@@ -4,9 +4,12 @@ An AI-powered data onboarding system that simplifies the process of importing, a
 
 ## Features
 
-- Excel file parsing and processing
+- Excel/CSV file parsing and processing
+  - Support for .xlsx, .xls, and .csv files
+  - Intelligent blank row filtering
+  - Automatic data validation
+  - MongoDB storage of parsed data
 - AI-powered data analysis and mapping
-- MongoDB data storage
 - RESTful API backend
 - Modern React frontend
 - Docker support
@@ -19,6 +22,7 @@ An AI-powered data onboarding system that simplifies the process of importing, a
 - MongoDB with Mongoose
 - OpenAI SDK for AI features
 - SheetJS for Excel processing
+- Multer for file uploads
 
 ### Frontend
 - React 18 with TypeScript
@@ -54,7 +58,7 @@ npm install
 ```bash
 # Backend
 cp backend/.env.example backend/.env
-# Edit with your OpenAI API key
+# Edit with your OpenAI API key and other settings
 
 # Frontend
 cp frontend/.env.development frontend/.env.local
@@ -144,9 +148,58 @@ docker-compose up --build
 ```
 
 Access the application:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
+- Frontend: http://localhost:3001
+- Backend API: http://localhost:3002
 
 ## License
 
 MIT
+
+## API Documentation
+
+### File Upload API
+
+#### Upload a File
+```bash
+POST http://localhost:3002/api/files/upload
+Content-Type: multipart/form-data
+
+Form Data:
+- file: Excel/CSV file (.xlsx, .xls, .csv)
+```
+
+Response:
+```json
+{
+  "message": "File uploaded and parsed successfully",
+  "fileId": "67f6a23b93c73d9045ef1182",
+  "rowCount": 100,
+  "headers": ["Column1", "Column2", "..."],
+  "totalRowsBeforeFiltering": 120,
+  "blankRowsRemoved": 20
+}
+```
+
+#### Retrieve Parsed Data
+```bash
+GET http://localhost:3002/api/files/:fileId
+```
+
+Response:
+```json
+{
+  "fileName": "example.xlsx",
+  "fileType": "xlsx",
+  "data": [{...}],
+  "rowCount": 100,
+  "columnHeaders": ["Column1", "Column2", "..."],
+  "uploadDate": "2024-04-09T16:37:15.465Z"
+}
+```
+
+File Upload Features:
+- Supports .xlsx, .xls, and .csv files
+- Maximum file size: 5MB
+- Automatically filters blank rows
+- Validates file format and content
+- Stores parsed data in MongoDB

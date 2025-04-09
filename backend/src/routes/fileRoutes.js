@@ -1,9 +1,16 @@
 const express = require('express');
-const upload = require('../middleware/upload');
-const { uploadFile } = require('../controllers/fileController');
-
 const router = express.Router();
+const { parseFile, getFileData } = require('../controllers/fileController');
+const { upload, handleFileUploadError } = require('../middleware/fileValidation');
 
-router.post('/upload', upload.single('file'), uploadFile);
+// Route for file upload and parsing
+router.post('/upload', 
+  upload.single('file'),
+  handleFileUploadError,
+  parseFile
+);
+
+// Route for retrieving parsed file data
+router.get('/:fileId', getFileData);
 
 module.exports = router;

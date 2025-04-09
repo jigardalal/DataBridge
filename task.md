@@ -11,6 +11,8 @@
 - [X] Add `.gitignore`
 - [X] Create initial `README.md`
 - [X] Debug initial setup errors (npm scripts, file syntax, configs)
+- [X] Configure backend port to avoid conflicts (using port 3002)
+- [X] Configure frontend port (using port 3001)
 
 ## Phase 1: Preparation & Design
 - [ ] Define output schemas for each data type (Customers, Drivers, Rates, etc.)
@@ -21,9 +23,13 @@
 
 ## Phase 2: Backend Core + Specialized AI Agents PoC
 - [ ] Build a minimal CLI PoC to test core AI functionality before UI development
-- [ ] Implement file upload API
-- [ ] Integrate `sheetjs` to parse Excel files and normalize all tabs to JSON
-- [ ] Create input validation layer to catch obvious issues before AI processing
+- [X] Implement file upload API with:
+  - [X] Support for .xlsx, .xls, and .csv files
+  - [X] File size and type validation
+  - [X] Blank row filtering
+  - [X] Error handling
+- [X] Integrate `sheetjs` to parse Excel files and normalize all tabs to JSON
+- [X] Create input validation layer to catch obvious issues before AI processing
 - [X] Store raw data in MongoDB (GridFS or pointer to file store) - *(RawFile schema created)*
 - [ ] Develop specialized OpenAI agents:
   - [ ] Classification agent to identify tab content types
