@@ -84,6 +84,7 @@ databridge/
 │   │   ├── models/        # Mongoose models
 │   │   ├── routes/        # API routes
 │   │   └── utils/         # Utility functions
+│   ├── __tests__/        # Test files
 │   └── package.json
 │
 ├── frontend/              # React application
@@ -100,6 +101,41 @@ databridge/
 ├── docs/                 # Documentation
 └── docker-compose.yml
 ```
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+cd backend
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Structure
+- Unit tests are located in `__tests__` directories
+- Tests follow the same structure as the source code
+- Each test file is named `*.test.js`
+
+### Continuous Integration
+- GitHub Actions automatically runs tests on push and pull requests
+- Tests run on Node.js 16.x and 18.x
+- Coverage reports are generated and uploaded as artifacts
+- PRs require passing tests before merging
+
+### Coverage Requirements
+- All new code should include tests
+- Aim for 80% coverage on:
+  - Statements
+  - Branches
+  - Functions
+  - Lines
 
 ## Docker Deployment
 

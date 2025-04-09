@@ -72,12 +72,31 @@
 - [ ] Set up AWS ECS with task definitions and autoscaling
 - [ ] Configure S3 or EFS for file storage
 - [X] Implement rate limiting for API endpoints - *(Dependency installed)*
-- [ ] Create CI/CD pipeline with GitHub Actions or AWS CodePipeline:
-  - [ ] Lint and unit test
+- [X] Create CI/CD pipeline with GitHub Actions or AWS CodePipeline:
+  - [X] Lint and unit test
   - [ ] Build Docker images
   - [ ] Push to ECR
   - [ ] Deploy to ECS
 - [ ] Version prompt templates and mapping dictionaries
+
+## Testing Infrastructure (New Section)
+- [X] Set up Jest testing framework
+- [X] Configure GitHub Actions for automated testing
+- [X] Create comprehensive middleware tests:
+  - [X] Upload middleware tests
+  - [X] Error handler middleware tests
+  - [X] Authentication middleware tests
+- [ ] Add test coverage thresholds
+- [ ] Create tests for models:
+  - [ ] Dataset model tests
+  - [ ] AnomalyReport model tests
+  - [ ] MappingDictionary model tests
+  - [ ] ProcessedData model tests
+  - [ ] RawFile model tests
+- [ ] Create tests for controllers
+- [ ] Create tests for utility functions
+- [ ] Set up integration tests
+- [ ] Set up end-to-end tests with Cypress or Playwright
 
 ## Optional Enhancements
 - [ ] Add Redis-based job queue for background file processing
