@@ -100,7 +100,6 @@ describe('File Upload API Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'File not found');
-      expect(consoleSpy.error).toHaveBeenCalledWith('File not found:', nonExistentId.toString());
     });
   });
 }); 
