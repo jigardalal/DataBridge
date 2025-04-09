@@ -10,6 +10,15 @@ An AI-powered data onboarding system that simplifies the process of importing, a
   - Automatic data validation
   - MongoDB storage of parsed data
 - AI-powered data analysis and mapping
+  - Classification of data types
+  - Field mapping and transformation
+  - Data validation and anomaly detection
+  - Intelligent fix suggestions
+- Token Management & Caching
+  - Daily and per-request token limits
+  - Usage tracking and statistics
+  - Redis-based response caching
+  - Automatic cache invalidation
 - RESTful API backend
 - Modern React frontend
 - Docker support
@@ -25,11 +34,13 @@ An AI-powered data onboarding system that simplifies the process of importing, a
 - Multer for file uploads
 
 ### Frontend
-- React 18 with TypeScript
-- Material-UI (MUI)
-- React Query
-- React Router
-- Vite
+- React 19 with TypeScript
+- Redux Toolkit for state management
+- Tailwind CSS for styling
+- React Router v7 for navigation
+- Material-UI (MUI) components
+- React Query for data fetching
+- Vite for build tooling
 
 
 ## Getting Started
@@ -82,6 +93,15 @@ npm run dev
 databridge/
 ├── backend/                # Express.js server
 │   ├── src/
+│   │   ├── agents/        # AI agents for data processing
+│   │   │   ├── BaseAgent.js
+│   │   │   ├── ClassificationAgent.js
+│   │   │   ├── MappingAgent.js
+│   │   │   └── ValidationAgent.js
+│   │   ├── services/      # Core services
+│   │   │   ├── TokenManager.js
+│   │   │   ├── CacheManager.js
+│   │   │   └── AIServiceManager.js
 │   │   ├── config/        # Configuration files
 │   │   ├── controllers/   # Route controllers
 │   │   ├── middleware/    # Custom middleware
@@ -89,16 +109,24 @@ databridge/
 │   │   ├── routes/        # API routes
 │   │   └── utils/         # Utility functions
 │   ├── __tests__/        # Test files
+│   │   ├── agents/       # Agent test suites
+│   │   ├── controllers/  # Controller tests
+│   │   ├── middleware/   # Middleware tests
+│   │   └── models/       # Model tests
 │   └── package.json
 │
 ├── frontend/              # React application
 │   ├── src/
 │   │   ├── components/   # Reusable components
-│   │   ├── pages/        # Page components
-│   │   ├── services/     # API services
-│   │   ├── hooks/        # Custom hooks
-│   │   ├── utils/        # Utility functions
-│   │   └── types/        # TypeScript types
+│   │   │   └── layout/  # Layout components (Header, Footer, Layout)
+│   │   ├── store/       # Redux store configuration
+│   │   ├── pages/       # Page components
+│   │   ├── services/    # API services
+│   │   ├── hooks/       # Custom hooks
+│   │   ├── utils/       # Utility functions
+│   │   └── types/       # TypeScript types
+│   ├── tailwind.config.js
+│   ├── postcss.config.js
 │   └── package.json
 │
 ├── docker/               # Docker configuration
@@ -203,3 +231,66 @@ File Upload Features:
 - Automatically filters blank rows
 - Validates file format and content
 - Stores parsed data in MongoDB
+
+### Token Management API
+
+#### Get Token Usage Stats
+```bash
+GET http://localhost:3002/api/tokens/stats
+```
+
+Response:
+```json
+{
+  "dailyUsage": 5000,
+  "dailyLimit": 100000,
+  "perRequestLimit": 1000,
+  "usageHistory": [...]
+}
+```
+
+#### Check Token Limits
+```bash
+POST http://localhost:3002/api/tokens/check
+Content-Type: application/json
+
+{
+  "estimatedTokens": 100
+}
+```
+
+Response:
+```json
+{
+  "allowed": true,
+  "remaining": 95000
+}
+```
+
+### Cache Management API
+
+#### Get Cache Stats
+```bash
+GET http://localhost:3002/api/cache/stats
+```
+
+Response:
+```json
+{
+  "connected_clients": 1,
+  "used_memory": "2.5MB",
+  "total_keys": 50
+}
+```
+
+#### Clear Cache
+```bash
+DELETE http://localhost:3002/api/cache/clear
+```
+
+Response:
+```json
+{
+  "message": "Cache cleared successfully"
+}
+```

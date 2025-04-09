@@ -7,6 +7,9 @@ const connectDB = require("./config/db");
 const authenticate = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 const fileRoutes = require('./routes/fileRoutes');
+const exportRoutes = require('./routes/exportRoutes');
+const tokenRoutes = require('./routes/tokenRoutes');
+const cacheRoutes = require('./routes/cacheRoutes');
 
 const app = express();
 
@@ -28,6 +31,9 @@ app.use(morgan("dev"));
 
 // Routes
 app.use('/api/files', fileRoutes);
+app.use('/api/export', exportRoutes);
+app.use('/api/tokens', tokenRoutes);
+app.use('/api/cache', cacheRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP' });

@@ -35,14 +35,24 @@
   - [X] Classification agent to identify tab content types
   - [X] Mapping agent to align fields with output schema
   - [X] Validation agent to detect anomalies and data issues
-- [ ] Implement caching strategy for AI responses to reduce costs
-- [ ] Design and implement token budget management system
+    - [X] Implement required field validation
+    - [X] Add format validation (email, phone, date, etc.)
+    - [X] Detect duplicate values
+    - [X] Use AI for inconsistency detection
+    - [X] Provide fix suggestions
+    - [X] Add comprehensive test suite
+- [X] Implement caching strategy for AI responses to reduce costs
+- [X] Design and implement token budget management system
 - [X] Save processed data with tags and metadata - *(ProcessedData schema created)*
 - [ ] Implement CSV export functionality per data type
 - [ ] Set up detailed logging for all AI interactions
 
 ## Phase 3: Frontend MVP
-- [X] Build React UI: - *(Basic setup and Navbar done)*
+- [X] Build React UI:
+  - [X] Set up React Router for navigation
+  - [X] Configure Redux for state management
+  - [X] Implement Tailwind CSS for styling
+  - [X] Create basic layout components (Header, Footer, Layout)
   - [ ] File upload component with drag-and-drop support
   - [ ] Dropdown to select entity type
   - [ ] Progress/status display
@@ -92,6 +102,11 @@
   - [X] Upload middleware tests
   - [X] Error handler middleware tests
   - [X] Authentication middleware tests
+- [X] Create comprehensive agent tests:
+  - [X] BaseAgent tests
+  - [X] ClassificationAgent tests
+  - [X] MappingAgent tests
+  - [X] ValidationAgent tests
 - [ ] Add test coverage thresholds
 - [ ] Create tests for models:
   - [ ] Dataset model tests
@@ -101,11 +116,6 @@
   - [ ] RawFile model tests
 - [ ] Create tests for controllers
 - [ ] Create tests for utility functions
-- [ ] Create tests for AI agents:
-  - [ ] BaseAgent tests (token counting, caching, API calls)
-  - [ ] ClassificationAgent tests (content type identification, sub-categories)
-  - [ ] MappingAgent tests (field mapping, transformations, refinement)
-  - [ ] ValidationAgent tests (anomaly detection, fixes, outlier analysis)
 - [ ] Set up integration tests
 - [ ] Set up end-to-end tests with Cypress or Playwright
 
@@ -115,3 +125,20 @@
 - [ ] Add telemetry/logging dashboard for prompt usage, errors, and outcomes
 - [ ] Implement A/B testing framework for prompt optimization
 - [ ] Create benchmark suite for evaluating mapping accuracy across file types
+
+## Discovered During Work
+- [X] Add validation for additional data formats (URLs, credit cards, etc.)
+- [X] Implement batch validation for large datasets
+- [X] Add support for custom validation rules
+- [X] Create validation rule templates for common use cases
+- [X] Add performance optimization for large-scale validation
+- [X] Implement validation result caching
+- [X] Add validation history tracking
+- [X] Create validation report generation
+- [X] Add support for international phone number formats
+- [X] Implement validation rule versioning
+- [ ] Create API endpoints for token management and cache control
+- [ ] Add monitoring dashboard for token usage and cache performance
+- [ ] Implement rate limiting based on token usage
+- [ ] Add cache warming for frequently accessed data
+- [ ] Create automated tests for token and cache services

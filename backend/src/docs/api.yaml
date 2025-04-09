@@ -1,0 +1,271 @@
+openapi: 3.0.0
+info:
+  title: DataBridge API
+  version: 1.0.0
+  description: API for AI-powered data onboarding system
+
+servers:
+  - url: http://localhost:3002/api
+    description: Development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TokenStats:
+      type: object
+      properties:
+        dailyUsage:
+          type: number
+          description: Number of tokens used today
+        dailyLimit:
+          type: number
+          description: Daily token limit
+        perRequestLimit:
+          type: number
+          description: Maximum tokens per request
+        usageHistory:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              usage:
+                type: number
+
+    CacheStats:
+      type: object
+      properties:
+        connected_clients:
+          type: number
+          description: Number of connected Redis clients
+        used_memory:
+          type: string
+          description: Memory used by Redis
+        total_keys:
+          type: number
+          description: Total number of keys in cache
+
+    ExportOptions:
+      type: object
+      properties:
+        filters:
+          type: object
+          properties:
+            dateRange:
+              type: object
+              properties:
+                start:
+                  type: string
+                  format: date
+                end:
+                  type: string
+                  format: date
+            status:
+              type: array
+              items:
+                type: string
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              value:
+                type: string
+              selected:
+                type: boolean
+
+paths:
+  /tokens/stats:
+    get:
+      summary: Get token usage statistics
+      tags: [Tokens]
+      responses:
+        '200':
+          description: Token usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenStats'
+        '500':
+          description: Server error
+
+  /tokens/check:
+    post:
+      summary: Check if a request would be allowed
+      tags: [Tokens]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estimatedTokens:
+                  type: number
+                  description: Estimated number of tokens for the request
+      responses:
+        '200':
+          description: Token limit check result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed:
+                    type: boolean
+                  remaining:
+                    type: number
+        '400':
+          description: Invalid request
+        '500':
+          description: Server error
+
+  /tokens/reset:
+    post:
+      summary: Reset daily token usage (Admin only)
+      tags: [Tokens]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token usage reset successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Server error
+
+  /cache/stats:
+    get:
+      summary: Get cache statistics
+      tags: [Cache]
+      responses:
+        '200':
+          description: Cache statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheStats'
+        '500':
+          description: Server error
+
+  /cache/health:
+    get:
+      summary: Check cache health
+      tags: [Cache]
+      responses:
+        '200':
+          description: Cache health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  healthy:
+                    type: boolean
+        '500':
+          description: Server error
+
+  /cache/clear:
+    delete:
+      summary: Clear entire cache (Admin only)
+      tags: [Cache]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cache cleared successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Server error
+
+  /cache/{key}:
+    delete:
+      summary: Delete specific cache entry (Admin only)
+      tags: [Cache]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cache entry deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Server error
+
+  /export/{dataType}/options:
+    get:
+      summary: Get export options for a data type
+      tags: [Export]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dataType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [customers, drivers, rates]
+      responses:
+        '200':
+          description: Export options
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportOptions'
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error
+
+  /export/{dataType}/csv:
+    post:
+      summary: Export data to CSV
+      tags: [Export]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dataType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [customers, drivers, rates]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportOptions'
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized
+        '500':
+          description: Server error 

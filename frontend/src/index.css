@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1976d2;
+  --color-secondary: #dc004e;
+}
+
+/* Custom styles */
+@layer components {
+  .btn-primary {
+    background-color: var(--color-primary);
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-radius: 0.25rem; /* rounded */
+    color: white;
+    transition: background-color 0.2s ease;
+  }
+  .btn-primary:hover {
+    background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+  }
+
+  .btn-secondary {
+    background-color: var(--color-secondary);
+    padding: 0.5rem 1rem; /* py-2 px-4 */
+    border-radius: 0.25rem; /* rounded */
+    color: white;
+    transition: background-color 0.2s ease;
+  }
+  .btn-secondary:hover {
+    background-color: color-mix(in srgb, var(--color-secondary) 90%, black);
+  }
+}
+
+/* Custom styles can be added below */
