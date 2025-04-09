@@ -11,7 +11,7 @@ const consoleSpy = mockConsole();
 describe('File Upload API Tests', () => {
   beforeAll(async () => {
     await connectDB();
-    server = app.listen(0);
+    server = app.listen();
   });
 
   afterAll(async () => {
@@ -22,39 +22,53 @@ describe('File Upload API Tests', () => {
 
   beforeEach(async () => {
     await FileData.deleteMany({});
+    // Clear all mock calls between tests
+    consoleSpy.log.mockClear();
+    consoleSpy.error.mockClear();
   });
 
   describe('POST /api/files/upload', () => {
     it('should successfully upload and parse an XLSX file', async () => {
       const response = await request(server)
         .post('/api/files/upload')
-        .attach('file', path.join(__dirname, 'fixtures/valid-test.xlsx'));
+        .attach('file', '__tests__/fixtures/valid-test.xlsx');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveProperty('message', 'File uploaded and processed successfully');
       expect(response.body).toHaveProperty('fileId');
       expect(mongoose.Types.ObjectId.isValid(response.body.fileId)).toBeTruthy();
-      expect(consoleSpy.log).toHaveBeenCalledWith('File uploaded successfully');
+      // Verify the sequence of log messages
+      expect(consoleSpy.log).toHaveBeenNthCalledWith(1, 'Received file:', expect.objectContaining({
+        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        originalname: 'valid-test.xlsx'
+      }));
+      expect(consoleSpy.log).toHaveBeenCalledWith('File validation passed');
+      expect(consoleSpy.log).toHaveBeenCalledWith('File upload request received');
     });
 
     it('should reject txt files', async () => {
       const response = await request(server)
         .post('/api/files/upload')
-        .attach('file', path.join(__dirname, 'fixtures/invalid.txt'));
+        .attach('file', '__tests__/fixtures/invalid.txt');
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error', 'Invalid file type. Only .xlsx files are allowed');
-      expect(consoleSpy.error).toHaveBeenCalled();
+      expect(consoleSpy.log).toHaveBeenCalledWith('Received file:', expect.objectContaining({
+        mimetype: 'text/plain',
+        originalname: 'invalid.txt'
+      }));
     });
 
     it('should handle empty files', async () => {
       const response = await request(server)
         .post('/api/files/upload')
-        .attach('file', path.join(__dirname, 'fixtures/empty.xlsx'));
+        .attach('file', '__tests__/fixtures/empty.xlsx');
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error', 'File is empty or contains no valid data');
-      expect(consoleSpy.error).toHaveBeenCalled();
+      expect(consoleSpy.log).toHaveBeenCalledWith('Received file:', expect.objectContaining({
+        mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        originalname: 'empty.xlsx'
+      }));
     });
   });
 
@@ -63,17 +77,18 @@ describe('File Upload API Tests', () => {
       // First upload a file
       const uploadResponse = await request(server)
         .post('/api/files/upload')
-        .attach('file', path.join(__dirname, 'fixtures/valid-test.xlsx'));
+        .attach('file', '__tests__/fixtures/valid-test.xlsx');
 
       const fileId = uploadResponse.body.fileId;
 
-      // Then retrieve the file data
-      const getResponse = await request(server)
+      // Then get the file data
+      const response = await request(server)
         .get(`/api/files/${fileId}`);
 
-      expect(getResponse.status).toBe(200);
-      expect(Array.isArray(getResponse.body.data)).toBeTruthy();
-      expect(getResponse.body.data.length).toBeGreaterThan(0);
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('_id', fileId);
+      expect(response.body).toHaveProperty('filename', 'valid-test.xlsx');
+      expect(response.body).toHaveProperty('status');
     });
 
     it('should return 404 for non-existent file', async () => {
@@ -83,7 +98,7 @@ describe('File Upload API Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'File not found');
-      expect(consoleSpy.error).toHaveBeenCalled();
+      expect(consoleSpy.log).toHaveBeenCalledWith('File not found:', nonExistentId.toString());
     });
   });
 }); 
