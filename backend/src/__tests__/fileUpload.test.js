@@ -87,8 +87,10 @@ describe('File Upload API Tests', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('_id', fileId);
-      expect(response.body).toHaveProperty('filename', 'valid-test.xlsx');
-      expect(response.body).toHaveProperty('status');
+      expect(response.body).toHaveProperty('fileName', 'valid-test.xlsx');
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('columnHeaders');
+      expect(response.body).toHaveProperty('rowCount');
     });
 
     it('should return 404 for non-existent file', async () => {
@@ -98,7 +100,7 @@ describe('File Upload API Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'File not found');
-      expect(consoleSpy.log).toHaveBeenCalledWith('File not found:', nonExistentId.toString());
+      expect(consoleSpy.error).toHaveBeenCalledWith('File not found:', nonExistentId.toString());
     });
   });
 }); 
