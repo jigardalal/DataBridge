@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const { app, connectDB } = require('../index');
 const FileData = require('../models/FileData');
 const mockConsole = require('./helpers/consoleMock');
+const XLSX = require('xlsx');
 
 let server;
 const consoleSpy = mockConsole();
@@ -70,6 +71,48 @@ describe('File Upload API Tests', () => {
         originalname: 'empty.xlsx'
       }));
     });
+
+    it('should handle request without file', async () => {
+      const response = await request(server)
+        .post('/api/files/upload');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'No file uploaded');
+      expect(consoleSpy.log).toHaveBeenCalledWith('No file received in request');
+    });
+
+    it('should handle corrupted XLSX file', async () => {
+      // Create a corrupted XLSX file (with XLSX header but invalid content)
+      const corruptedBuffer = Buffer.from('504b0304' + '0A0A0A0A', 'hex'); // Invalid ZIP/XLSX structure
+      
+      const response = await request(server)
+        .post('/api/files/upload')
+        .attach('file', corruptedBuffer, 'corrupted.xlsx');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'Error parsing file. Please ensure it is a valid Excel/CSV file.');
+      expect(consoleSpy.error).toHaveBeenCalledWith('Error parsing file:', expect.any(Error));
+    });
+
+    it('should handle file with only empty rows', async () => {
+      // Create an XLSX with only empty rows
+      const workbook = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet([
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ]);
+      XLSX.utils.book_append_sheet(workbook, ws, 'Sheet1');
+      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+      const response = await request(server)
+        .post('/api/files/upload')
+        .attach('file', buffer, 'empty-rows.xlsx');
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('error', 'File is empty or contains no valid data');
+      expect(consoleSpy.log).toHaveBeenCalledWith('File is empty after filtering blank rows');
+    });
   });
 
   describe('GET /api/files/:fileId', () => {
@@ -100,6 +143,26 @@ describe('File Upload API Tests', () => {
 
       expect(response.status).toBe(404);
       expect(response.body).toHaveProperty('error', 'File not found');
+    });
+
+    it('should handle invalid ObjectId format', async () => {
+      const response = await request(server)
+        .get('/api/files/invalid-id');
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Error retrieving file data');
+      expect(consoleSpy.error).toHaveBeenCalledWith('Error retrieving file data:', expect.any(Error));
+    });
+
+    it('should handle database errors', async () => {
+      // Force a database error by passing a valid ObjectId format but with incorrect length
+      const invalidId = 'abcd1234';
+      const response = await request(server)
+        .get(`/api/files/${invalidId}`);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Error retrieving file data');
+      expect(consoleSpy.error).toHaveBeenCalledWith('Error retrieving file data:', expect.any(Error));
     });
   });
 }); 
