@@ -1,0 +1,13 @@
+Tariff Name,Tarrif Effective Start Date,Tarff Effective End Date,Load Type,Terminal,Customer,Pick Up Location,Delivery Location,Return Location,Charge Profile Name,Charge Name,Charge Description,Unit of Measure,Percentage Based On,Effective date based on,Charge Effective Start Date,Charge Effective End Date,Auto Add,Calculate From This Event,Calculate To This Event,Calculate In This Event,Calculate For Exact Events,Zip Code Rule (any in),Zip Code Rule (not in),Load Type Rule (any in),Load Type Rule (not in),Minimum Amount,Free Units,Amount,Start Distance,End Distance,End Row (Leave blank)
+Load Tariff A,01/01/2023,08/08/2023,"IMPORT,EXPORT",Terminal A,Company A; Company B,"Pick Up Group;City, State;City State Group Name","Delivery Group;City,State;City State Group Name","Return Group;City,State;City State Group Name",Zip Code Group A,BASE PRICE,Some description,Radius Rate,,,,,Yes,,,,,"54113,55465,22333,12345A",11232,"IMPORT,EXPORT",ROAD,,,10,0,10,
+Load Tariff A,,,,,,,,,Zip Code Group A,,,,,,,,,,,,,,,,,,,20,11,50,
+Load Tariff A,,,,,,,,,Zip Code Group B,BASE PRICE,Some description,Per Day,,CURRENT DATE,01/01/2023,08/08/2023,No,ENROUTE TO CHASSIS,"ARRIVED TO CHASSIS,ENROUTE TO PICK CONTAINER",,,"5,544,122,334","11,123,221",IMPORT,,5,6,30,,,
+Load Tariff A,,,,,,,,,Zip Code Group B,,,,,,09/09/2023,12/12/2023,,,,,,,,,,7,8,40,,,
+Load Tariff B,01/01/2023,08/08/2023,"IMPORT,EXPORT","Terminal A, Terminal B",Company A; Company C,Zip Code Group;Pickup B,44600;Delivery B,Return A;Return B,Zip Code Group C,BASE PRICE,Some description,Per Day,,CURRENT DATE,01/01/2023,08/08/2023,Yes,,,Chassis Pick,,"5,544,122,334","11,123,221",IMPORT,,9,10,50,,,
+Load Tariff B,,,,,,,,,Zip Code Group C,,,,,,09/09/2023,12/12/2023,,,,,,,,,,11,12,60,,,
+Load Tariff B,,,,,,,,,Zip Code Group D,BASE PRICE,Some description,Per Day,,,,,Yes,,,,"Chassis Pick,Pull Container,Deliver Load","5,544,122,334","11,123,221",IMPORT,,13,14,70,,,
+Load Tariff B,,,,,,,,,Zip Code Group D,,,,,,,,,,,,,,,,,15,16,80,,,
+Load Tariff B,,,,,,,,,Zip Code Group E,BASE PRICE,Some description,Per Day,,,,,Yes,,,,,,,,,17,18,90,,,
+Load Tariff B,,,,,,,,,Zip Code Group E,,,,,,,,,,,,,,,,,19,20,100,,,
+Load Tariff B,,,,,,,,,Zip Code Group F,BASE PRICE,Some description,Percentage,BASE PRICE;FUEL,,,,Yes,,,,,,,,,17,18,90,,,
+Load Tariff B,,,,,,,,,Zip Code Group F,,,,,,,,,,,,,,,,,19,20,100,,,

@@ -1,257 +1,245 @@
+const { OpenAI } = require('openai');
 const ValidationAgent = require('../../agents/ValidationAgent');
 
-// Mock the BaseAgent class
-jest.mock('../../agents/BaseAgent', () => {
-  return class MockBaseAgent {
-    constructor() {
-      this.makeAPICall = jest.fn();
-      this.formatSystemMessage = jest.fn().mockImplementation((role) => ({
-        role: 'system',
-        content: `You are an AI assistant specialized in ${role}. Provide clear, accurate, and detailed responses based on the input provided.`
-      }));
-    }
+// Mock OpenAI
+jest.mock('openai', () => {
+  return {
+    OpenAI: jest.fn().mockImplementation(() => ({
+      chat: {
+        completions: {
+          create: jest.fn().mockImplementation((params) => {
+            const messages = params.messages;
+            const userMessage = messages.find(m => m.role === 'user');
+            const content = JSON.parse(userMessage.content);
+            
+            // Return empty fixes array if errors array is empty
+            if (content.errors && content.errors.length === 0) {
+              return Promise.resolve({
+                choices: [{ 
+                  message: { 
+                    content: JSON.stringify({
+                      fixes: []
+                    })
+                  } 
+                }],
+                usage: { total_tokens: 10 },
+                model: 'test-model'
+              });
+            }
+
+            // Return fixes for non-empty errors array
+            return Promise.resolve({
+              choices: [{ 
+                message: { 
+                  content: JSON.stringify({
+                    inconsistencies: [
+                      {
+                        field: 'age',
+                        type: 'inconsistent_value',
+                        message: 'Age value is inconsistent with birth date',
+                        severity: 2
+                      }
+                    ],
+                    fixes: [
+                      {
+                        field: 'email',
+                        type: 'invalid_format',
+                        suggestion: 'Please enter a valid email address in the format: user@example.com'
+                      }
+                    ]
+                  })
+                } 
+              }],
+              usage: { total_tokens: 10 },
+              model: 'test-model'
+            });
+          })
+        }
+      }
+    }))
   };
 });
 
 describe('ValidationAgent', () => {
   let agent;
-  let mockMakeAPICall;
+  let mockCreate;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    agent = new ValidationAgent();
-    mockMakeAPICall = jest.fn();
-    agent.makeAPICall = mockMakeAPICall;
+    agent = new ValidationAgent({
+      model: 'test-model',
+      temperature: 0.5
+    });
+    mockCreate = agent.openai.chat.completions.create;
   });
 
-  describe('detectAnomalies', () => {
-    const mappedData = [
-      { name: 'John Doe', email: 'john@example.com', age: 25 },
-      { name: 'Jane Smith', email: 'invalid-email', age: -5 },
-      { name: 'John Doe', email: 'john2@example.com', age: 1000 }
+  describe('validateData', () => {
+    const sampleCustomerData = [
+      {
+        id: 'C001',
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '123-456-7890',
+        join_date: '2023-01-01'
+      },
+      {
+        id: 'C002',
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        phone: 'invalid-phone',
+        join_date: '2023-02-01'
+      }
     ];
 
-    const schema = {
-      name: { type: 'string', required: true },
-      email: { type: 'string', format: 'email', required: true },
-      age: { type: 'number', min: 0, max: 120 }
-    };
+    test('validates customer data correctly', async () => {
+      const result = await agent.validateData(sampleCustomerData, 'customer');
+      
+      expect(result.errors).toContainEqual({
+        field: 'phone',
+        type: 'invalid_format',
+        message: 'Field \'phone\' has invalid format',
+        severity: 2,
+        suggestion: expect.any(String)
+      });
 
-    test('detects various types of anomalies', async () => {
-      const mockResponse = {
-        content: JSON.stringify({
-          anomalies: [
-            {
-              field: 'email',
-              type: 'format_invalid',
-              severity: 'High',
-              affected_rows: [1],
-              suggestion: 'Validate email format'
-            },
-            {
-              field: 'age',
-              type: 'out_of_range',
-              severity: 'Medium',
-              affected_rows: [1, 2],
-              suggestion: 'Check age values'
-            },
-            {
-              field: 'name',
-              type: 'duplicate',
-              severity: 'Low',
-              affected_rows: [0, 2],
-              suggestion: 'Review duplicate names'
-            }
-          ],
-          validation_failures: ['invalid_email_format', 'age_out_of_range'],
-          data_quality_score: 0.7,
-          recommendations: ['Implement email validation', 'Add age range checks']
-        })
-      };
+      expect(result.stats).toEqual({
+        total_records: 2,
+        error_count: expect.any(Number),
+        field_errors: expect.any(Object),
+        severity_counts: expect.any(Object)
+      });
 
-      mockMakeAPICall.mockResolvedValue(mockResponse);
-
-      const result = await agent.detectAnomalies(mappedData, schema);
-
-      expect(result.anomalies).toHaveLength(3);
-      expect(result.data_quality_score).toBe(0.7);
-      expect(mockMakeAPICall).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({ role: 'system' }),
-          expect.objectContaining({
-            role: 'user',
-            content: expect.stringContaining('email')
-          })
-        ]),
-        expect.objectContaining({
-          temperature: 0.2,
-          response_format: { type: 'json_object' }
-        })
-      );
+      expect(result.overall_confidence).toBeGreaterThanOrEqual(0);
+      expect(result.overall_confidence).toBeLessThanOrEqual(1);
     });
 
-    test('handles empty dataset', async () => {
-      const mockResponse = {
-        content: JSON.stringify({
-          anomalies: [],
-          validation_failures: [],
-          data_quality_score: 1.0,
-          recommendations: []
-        })
-      };
+    test('handles missing required fields', async () => {
+      const invalidData = [
+        {
+          id: 'C001',
+          // Missing name and email
+          phone: '123-456-7890'
+        }
+      ];
 
-      mockMakeAPICall.mockResolvedValue(mockResponse);
+      const result = await agent.validateData(invalidData, 'customer');
       
-      const result = await agent.detectAnomalies([], schema);
+      expect(result.errors).toContainEqual({
+        field: 'name',
+        type: 'missing_required',
+        message: 'Required field \'name\' is missing',
+        severity: 3
+      });
+
+      expect(result.errors).toContainEqual({
+        field: 'email',
+        type: 'missing_required',
+        message: 'Required field \'email\' is missing',
+        severity: 3
+      });
+    });
+
+    test('detects duplicate values', async () => {
+      const duplicateData = [
+        {
+          id: 'C001',
+          name: 'John Doe',
+          email: 'john@example.com'
+        },
+        {
+          id: 'C001', // Duplicate ID
+          name: 'Jane Smith',
+          email: 'jane@example.com'
+        }
+      ];
+
+      const result = await agent.validateData(duplicateData, 'customer');
       
-      expect(mockMakeAPICall).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            role: 'user',
-            content: expect.stringContaining('[]')
-          })
-        ]),
-        expect.any(Object)
-      );
-      expect(result.anomalies).toHaveLength(0);
+      expect(result.errors).toContainEqual({
+        field: 'id',
+        type: 'duplicate_value',
+        message: 'Duplicate value found for field \'id\'',
+        severity: 2
+      });
+    });
+
+    test('handles empty data', async () => {
+      await expect(agent.validateData([], 'customer'))
+        .rejects.toThrow('No data provided for validation');
+    });
+
+    test('handles unknown schema type', async () => {
+      await expect(agent.validateData(sampleCustomerData, 'unknown'))
+        .rejects.toThrow('Unknown schema type');
+    });
+  });
+
+  describe('validateField', () => {
+    test('validates required field', () => {
+      const errors = agent.validateField('name', '', 'customer');
+      expect(errors).toContainEqual({
+        field: 'name',
+        type: 'missing_required',
+        message: 'Required field \'name\' is missing',
+        severity: 3
+      });
+    });
+
+    test('validates email format', () => {
+      const errors = agent.validateField('email', 'invalid-email', 'customer');
+      expect(errors).toContainEqual({
+        field: 'email',
+        type: 'invalid_format',
+        message: 'Field \'email\' has invalid format',
+        severity: 2,
+        suggestion: expect.any(String)
+      });
+    });
+
+    test('validates phone format', () => {
+      const errors = agent.validateField('phone', '123', 'customer');
+      expect(errors).toContainEqual({
+        field: 'phone',
+        type: 'invalid_format',
+        message: 'Field \'phone\' has invalid format',
+        severity: 2,
+        suggestion: expect.any(String)
+      });
+    });
+
+    test('returns empty array for valid field', () => {
+      const errors = agent.validateField('email', 'valid@example.com', 'customer');
+      expect(errors).toHaveLength(0);
     });
   });
 
   describe('suggestFixes', () => {
-    const anomalies = [
-      {
-        field: 'email',
-        type: 'format_invalid',
-        affected_rows: [1],
-        value: 'invalid-email'
-      }
-    ];
-
-    const data = [
-      { email: 'john@example.com' },
-      { email: 'invalid-email' }
-    ];
-
-    test('suggests appropriate fixes for anomalies', async () => {
-      const mockResponse = {
-        content: JSON.stringify({
-          fixes: [
-            {
-              anomaly_id: 0,
-              fix_type: 'Automatic',
-              transformation: 'validate_email_format',
-              confidence: 0.9
-            }
-          ],
-          required_user_input: ['Confirm email addresses'],
-          prevention_rules: ['Add email format validation']
-        })
-      };
-
-      mockMakeAPICall.mockResolvedValue(mockResponse);
-
-      const result = await agent.suggestFixes(anomalies, data);
-
-      expect(result.fixes).toHaveLength(1);
-      expect(result.prevention_rules).toBeDefined();
-      expect(mockMakeAPICall).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            role: 'user',
-            content: expect.stringContaining('email')
-          })
-        ]),
-        expect.objectContaining({
-          temperature: 0.3,
-          response_format: { type: 'json_object' }
-        })
-      );
-    });
-  });
-
-  describe('analyzeOutliers', () => {
-    const data = [
-      { age: 25, salary: 50000 },
-      { age: 30, salary: 60000 },
-      { age: 35, salary: 1000000 },
-      { age: -5, salary: 45000 }
-    ];
-
-    const numericalFields = ['age', 'salary'];
-
-    test('identifies statistical outliers', async () => {
-      const mockResponse = {
-        content: JSON.stringify({
-          outliers: {
-            age: [{ row: 3, value: -5, reason: 'below_minimum' }],
-            salary: [{ row: 2, value: 1000000, reason: 'statistical_outlier' }]
-          },
-          statistics: {
-            age: { mean: 21.25, std: 17.97 },
-            salary: { mean: 288750, std: 472439.35 }
-          },
-          thresholds: {
-            age: { min: 0, max: 120 },
-            salary: { lower: 0, upper: 200000 }
-          },
-          visualization_suggestions: ['box_plot', 'scatter_plot'],
-          confidence: 0.95
-        })
-      };
-
-      mockMakeAPICall.mockResolvedValue(mockResponse);
-
-      const result = await agent.analyzeOutliers(data, numericalFields);
-
-      expect(result.outliers.age).toHaveLength(1);
-      expect(result.outliers.salary).toHaveLength(1);
-      expect(mockMakeAPICall).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            role: 'user',
-            content: expect.stringContaining('outliers')
-          })
-        ]),
-        expect.objectContaining({
-          temperature: 0.2,
-          response_format: { type: 'json_object' }
-        })
-      );
-    });
-
-    test('handles dataset with no outliers', async () => {
-      const normalData = [
-        { age: 25, salary: 50000 },
-        { age: 30, salary: 60000 },
-        { age: 35, salary: 55000 }
+    test('suggests fixes for validation errors', async () => {
+      const errors = [
+        {
+          field: 'email',
+          type: 'invalid_format',
+          message: 'Invalid email format',
+          severity: 2
+        }
       ];
 
-      const mockResponse = {
-        content: JSON.stringify({
-          outliers: {
-            age: [],
-            salary: []
-          },
-          statistics: {
-            age: { mean: 30, std: 5 },
-            salary: { mean: 55000, std: 5000 }
-          },
-          thresholds: {
-            age: { min: 0, max: 120 },
-            salary: { lower: 0, upper: 200000 }
-          },
-          visualization_suggestions: ['box_plot'],
-          confidence: 0.95
-        })
-      };
+      const result = await agent.suggestFixes(errors);
+      expect(result).toEqual(expect.any(Object));
+      expect(result.fixes).toBeDefined();
+      expect(result.fixes).toHaveLength(1);
+      expect(result.fixes[0]).toEqual(expect.objectContaining({
+        field: 'email',
+        type: 'invalid_format',
+        suggestion: expect.any(String)
+      }));
+    });
 
-      mockMakeAPICall.mockResolvedValue(mockResponse);
-
-      const result = await agent.analyzeOutliers(normalData, numericalFields);
-
-      expect(result.outliers.age).toHaveLength(0);
-      expect(result.outliers.salary).toHaveLength(0);
-      expect(mockMakeAPICall).toHaveBeenCalled();
+    test('handles empty errors array', async () => {
+      const result = await agent.suggestFixes([]);
+      expect(result).toEqual(expect.any(Object));
+      expect(result.fixes).toBeDefined();
+      expect(result.fixes).toHaveLength(0);
     });
   });
 });

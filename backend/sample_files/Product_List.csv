@@ -1,0 +1,6 @@
+Product ID,Product Name,Category,Price,Stock,Status,Last Restock Date
+PRD001,Widget A,Electronics,99.99,50,Active,2023-05-15
+PRD002,Gadget B,Accessories,49.99,100,Active,2023-05-20
+PRD003,Tool C,Hardware,29.99,25,Inactive,2023-04-10
+PRD004,Device D,Electronics,199.99,75,Active,2023-05-25
+PRD005,Item E,Accessories,79.99,30,Active,2023-06-01 

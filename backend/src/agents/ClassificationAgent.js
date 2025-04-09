@@ -1,100 +1,181 @@
 const BaseAgent = require('./BaseAgent');
 
+/**
+ * @typedef {Object} ClassificationResult
+ * @property {string} classified_type - The identified content type (e.g., 'customers', 'drivers')
+ * @property {number} confidence_score - Confidence level between 0 and 1
+ * @property {string} reasoning - Explanation of the classification decision
+ * @property {string[]} suggested_mappings - Array of key fields supporting the classification
+ */
+
+/**
+ * @typedef {Object} SubCategoryResult
+ * @property {string[]} sub_categories - Array of identified sub-categories
+ * @property {string[]} special_cases - Array of special cases or edge cases
+ * @property {number} confidence - Confidence score between 0 and 1
+ */
+
 class ClassificationAgent extends BaseAgent {
   constructor(config = {}) {
-    super(config);
-    this.systemPrompt = this.formatSystemMessage('data classification');
+    super({
+      ...config,
+      model: config.model || 'gpt-4-turbo-preview',
+      temperature: config.temperature || 0.3
+    });
   }
 
   /**
-   * Validate input data
+   * Validate classification result against schema
    * @private
+   * @param {Object} result - The result to validate
+   * @returns {ClassificationResult}
    */
-  _validateData(data) {
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Input data must be a non-empty array');
+  _validateClassificationResult(result) {
+    if (!result || typeof result !== 'object') {
+      throw new Error('Invalid classification result format');
     }
-    if (!data[0] || typeof data[0] !== 'object') {
-      throw new Error('Input data must contain valid objects');
+
+    const requiredFields = ['classified_type', 'confidence_score', 'reasoning'];
+    for (const field of requiredFields) {
+      if (!(field in result)) {
+        throw new Error(`Missing required field: ${field}`);
+      }
+    }
+
+    if (typeof result.confidence_score !== 'number' || 
+        result.confidence_score < 0 || 
+        result.confidence_score > 1) {
+      throw new Error('confidence_score must be a number between 0 and 1');
+    }
+
+    if (!Array.isArray(result.suggested_mappings)) {
+      result.suggested_mappings = [];
+    }
+
+    return result;
+  }
+
+  /**
+   * Validate sub-category result against schema
+   * @private
+   * @param {Object} result - The result to validate
+   * @returns {SubCategoryResult}
+   */
+  _validateSubCategoryResult(result) {
+    if (!result || typeof result !== 'object') {
+      throw new Error('Invalid sub-category result format');
+    }
+
+    const requiredFields = ['sub_categories', 'special_cases', 'confidence'];
+    for (const field of requiredFields) {
+      if (!(field in result)) {
+        throw new Error(`Missing required field: ${field}`);
+      }
+    }
+
+    if (!Array.isArray(result.sub_categories)) {
+      throw new Error('sub_categories must be an array');
+    }
+
+    if (!Array.isArray(result.special_cases)) {
+      throw new Error('special_cases must be an array');
+    }
+
+    if (typeof result.confidence !== 'number' || 
+        result.confidence < 0 || 
+        result.confidence > 1) {
+      throw new Error('confidence must be a number between 0 and 1');
+    }
+
+    return result;
+  }
+
+  /**
+   * Classify the content of an Excel tab based on its headers and sample data
+   * @param {Array<Object>} data - Array of objects representing rows from the tab
+   * @param {Array<string>} [possibleTypes] - Optional list of possible content types to consider
+   * @returns {Promise<ClassificationResult>} Classification result with type, confidence, and reasoning
+   */
+  async classifyTabContent(data, possibleTypes = null) {
+    if (!data || data.length === 0) {
+      throw new Error('No data provided for classification');
+    }
+
+    const headers = Object.keys(data[0]);
+    const sampleRows = data.slice(0, 5); // Use first 5 rows for context
+
+    const systemMessage = this.formatSystemMessage('data classification');
+    const userMessage = {
+      role: 'user',
+      content: JSON.stringify({
+        headers,
+        sample_data: sampleRows,
+        possible_types: possibleTypes || [
+          'customers',
+          'drivers',
+          'vehicles',
+          'orders',
+          'products',
+          'employees',
+          'locations',
+          'transactions',
+          'inventory',
+          'suppliers'
+        ]
+      })
+    };
+
+    const response = await this.makeAPICall(
+      [systemMessage, userMessage],
+      {
+        response_format: { type: 'json_object' },
+        temperature: 0.3
+      }
+    );
+
+    try {
+      const result = JSON.parse(response.content);
+      return this._validateClassificationResult(result);
+    } catch (error) {
+      throw new Error('Failed to parse or validate classification response');
     }
   }
 
   /**
-   * Classify the content type of a spreadsheet tab
-   * @param {Object} tabData - The data from the spreadsheet tab
-   * @param {string[]} possibleTypes - Array of possible content types
-   * @returns {Promise<Object>} Classification result with confidence score
+   * Identify sub-categories within a classified tab
+   * @param {Array<Object>} data - Array of objects representing rows from the tab
+   * @param {string} mainType - The main classification type
+   * @returns {Promise<SubCategoryResult>} Sub-categories and special cases
    */
-  async classifyTabContent(tabData, possibleTypes = ['customers', 'drivers', 'rates']) {
-    this._validateData(tabData);
+  async identifySubCategories(data, mainType) {
+    if (!data || data.length === 0) {
+      throw new Error('No data provided for sub-category identification');
+    }
 
-    const headers = Object.keys(tabData[0] || {});
-    const sampleRows = tabData.slice(0, 5);
+    const systemMessage = this.formatSystemMessage('sub-category identification');
+    const userMessage = {
+      role: 'user',
+      content: JSON.stringify({
+        main_type: mainType,
+        sample_data: data.slice(0, 10), // Use first 10 rows for context
+        fields: Object.keys(data[0])
+      })
+    };
 
-    const messages = [
-      this.systemPrompt,
+    const response = await this.makeAPICall(
+      [systemMessage, userMessage],
       {
-        role: 'user',
-        content: `Analyze this spreadsheet tab and determine its content type from these options: ${possibleTypes.join(', ')}.
-        
-Headers: ${JSON.stringify(headers)}
-Sample rows: ${JSON.stringify(sampleRows, null, 2)}
-
-Provide your response in JSON format with:
-1. classified_type: The identified content type
-2. confidence_score: A number between 0 and 1
-3. reasoning: Brief explanation of your classification
-4. suggested_mappings: Key header fields that support this classification`
+        response_format: { type: 'json_object' },
+        temperature: 0.4
       }
-    ];
+    );
 
-    const response = await this.makeAPICall(messages, {
-      temperature: 0.3, // Lower temperature for more consistent classifications
-      response_format: { type: 'json_object' }
-    });
-
-    return JSON.parse(response.content);
-  }
-
-  /**
-   * Identify potential sub-categories or special cases within a content type
-   * @param {Object} tabData - The data from the spreadsheet tab
-   * @param {string} mainType - The main content type already identified
-   * @returns {Promise<Object>} Sub-classification details
-   */
-  async identifySubCategories(tabData, mainType) {
-    this._validateData(tabData);
-
-    const headers = Object.keys(tabData[0] || {});
-    const sampleRows = tabData.slice(0, 3);
-
-    const messages = [
-      this.systemPrompt,
-      {
-        role: 'user',
-        content: `For this ${mainType} data, identify any specific sub-categories or special cases.
-
-Headers: ${JSON.stringify(headers)}
-Sample rows: ${JSON.stringify(sampleRows, null, 2)}
-
-Look for patterns that might indicate:
-- Special customer types (VIP, corporate, individual)
-- Driver categories (full-time, contractor)
-- Rate structures (fixed, variable, zone-based)
-
-Provide your response in JSON format with:
-1. sub_categories: Array of identified sub-categories
-2. special_cases: Any edge cases or special handling needed
-3. confidence: Confidence score for sub-categorization`
-      }
-    ];
-
-    const response = await this.makeAPICall(messages, {
-      temperature: 0.4,
-      response_format: { type: 'json_object' }
-    });
-
-    return JSON.parse(response.content);
+    try {
+      const result = JSON.parse(response.content);
+      return this._validateSubCategoryResult(result);
+    } catch (error) {
+      throw new Error('Failed to parse or validate sub-category response');
+    }
   }
 }
 

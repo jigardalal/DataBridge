@@ -1,0 +1,6 @@
+Customer ID,Customer Name,Email,Phone,Address,Status,Join Date
+CUST001,John Smith,john.smith@example.com,555-0101,123 Main St,Active,2023-01-15
+CUST002,Jane Doe,jane.doe@example.com,555-0102,456 Oak Ave,Active,2023-02-20
+CUST003,Robert Johnson,robert.j@example.com,555-0103,789 Pine Rd,Inactive,2023-03-10
+CUST004,Emily Davis,emily.d@example.com,555-0104,321 Elm St,Active,2023-04-05
+CUST005,Michael Brown,michael.b@example.com,555-0105,654 Maple Dr,Active,2023-05-12 

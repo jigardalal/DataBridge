@@ -1,0 +1,6 @@
+Order ID,Customer ID,Order Date,Total Amount,Status,Payment Method,Delivery Address
+ORD001,CUST001,2023-06-01,150.00,Completed,Credit Card,123 Main St
+ORD002,CUST002,2023-06-02,275.50,Processing,PayPal,456 Oak Ave
+ORD003,CUST003,2023-06-03,89.99,Cancelled,Credit Card,789 Pine Rd
+ORD004,CUST004,2023-06-04,420.75,Completed,Bank Transfer,321 Elm St
+ORD005,CUST005,2023-06-05,199.99,Processing,Credit Card,654 Maple Dr 

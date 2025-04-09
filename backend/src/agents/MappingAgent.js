@@ -1,9 +1,203 @@
 const BaseAgent = require('./BaseAgent');
 
+/**
+ * @typedef {Object} FieldMapping
+ * @property {string} input_field - Original field name from input
+ * @property {string} output_field - Mapped field name in output schema
+ * @property {number} confidence - Confidence score for the mapping (0-1)
+ * @property {string[]} [variations] - Other possible variations of this field name
+ */
+
+/**
+ * @typedef {Object} MappingResult
+ * @property {FieldMapping[]} mappings - Array of field mappings
+ * @property {string[]} unmapped_fields - Fields that couldn't be mapped
+ * @property {number} overall_confidence - Overall confidence score for the mapping
+ * @property {Object} usage_stats - Statistics about the mapping operation
+ */
+
 class MappingAgent extends BaseAgent {
   constructor(config = {}) {
-    super(config);
-    this.systemPrompt = this.formatSystemMessage('data field mapping');
+    super({
+      ...config,
+      model: config.model || 'gpt-4-turbo-preview',
+      temperature: config.temperature || 0.2
+    });
+
+    // Initialize mapping dictionary with common variations
+    this.mappingDictionary = {
+      customer: {
+        id: ['Customer ID', 'CustomerID', 'Client ID', 'CustID', 'Customer Number'],
+        name: ['Customer Name', 'Client Name', 'Full Name', 'Name'],
+        email: ['Email', 'Email Address', 'Contact Email', 'E-mail'],
+        phone: ['Phone', 'Phone Number', 'Contact Number', 'Telephone'],
+        address: ['Address', 'Street Address', 'Mailing Address', 'Location'],
+        status: ['Status', 'Customer Status', 'Client Status', 'State'],
+        join_date: ['Join Date', 'Registration Date', 'Start Date', 'Member Since']
+      },
+      driver: {
+        id: ['Driver ID', 'DriverID', 'Driver Number', 'ID'],
+        name: ['Driver Name', 'Name', 'Full Name'],
+        license: ['License Number', 'Driver License', 'License ID', 'DL Number'],
+        vehicle_type: ['Vehicle Type', 'Vehicle Category', 'Car Type'],
+        status: ['Status', 'Driver Status', 'Active Status'],
+        phone: ['Phone', 'Contact Number', 'Mobile Number'],
+        join_date: ['Join Date', 'Start Date', 'Registration Date']
+      },
+      vehicle: {
+        id: ['Vehicle ID', 'VehicleID', 'Car ID', 'Fleet Number'],
+        make: ['Make', 'Manufacturer', 'Brand'],
+        model: ['Model', 'Vehicle Model', 'Car Model'],
+        year: ['Year', 'Model Year', 'Manufacturing Year'],
+        status: ['Status', 'Vehicle Status', 'Condition'],
+        license_plate: ['License Plate', 'Plate Number', 'Registration Number'],
+        last_service: ['Last Service Date', 'Service Date', 'Maintenance Date']
+      }
+    };
+
+    // Initialize usage statistics
+    this.usageStats = {
+      total_calls: 0,
+      cache_hits: 0,
+      field_stats: {}
+    };
+  }
+
+  /**
+   * Generate a cache key for field mapping
+   * @private
+   * @param {string[]} inputFields - Array of input field names
+   * @param {string} targetSchema - Target schema type (e.g., 'customer', 'driver')
+   * @returns {string} Cache key
+   */
+  _generateMappingCacheKey(inputFields, targetSchema) {
+    const sortedFields = [...inputFields].sort().join(',');
+    return `${targetSchema}:${sortedFields}`;
+  }
+
+  /**
+   * Update usage statistics for field mappings
+   * @private
+   * @param {string} targetSchema - Schema being mapped to
+   * @param {FieldMapping[]} mappings - Array of field mappings
+   */
+  _updateUsageStats(targetSchema, mappings) {    
+    if (!this.usageStats.field_stats[targetSchema]) {
+      this.usageStats.field_stats[targetSchema] = {};
+    }
+
+    mappings.forEach(mapping => {
+      if (!this.usageStats.field_stats[targetSchema][mapping.output_field]) {
+        this.usageStats.field_stats[targetSchema][mapping.output_field] = {
+          total_mappings: 0,
+          variations: new Set()
+        };
+      }
+
+      const stats = this.usageStats.field_stats[targetSchema][mapping.output_field];
+      stats.total_mappings++;
+      stats.variations.add(mapping.input_field);
+    });
+  }
+
+  /**
+   * Map input fields to target schema fields
+   * @param {string[]} inputFields - Array of input field names
+   * @param {string} targetSchema - Target schema type (e.g., 'customer', 'driver')
+   * @param {Object} [options] - Additional options for mapping
+   * @returns {Promise<MappingResult>} Mapping result with confidence scores
+   */
+  async mapFields(inputFields, targetSchema, options = {}) {
+    if (!inputFields || !inputFields.length) {
+      throw new Error('No input fields provided');
+    }
+
+    if (!this.mappingDictionary[targetSchema]) {
+      throw new Error(`Unknown schema type: ${targetSchema}`);
+    }
+
+    this.usageStats.total_calls++;
+    const cacheKey = this._generateMappingCacheKey(inputFields, targetSchema);
+    const cachedResult = this.getCachedResponse(cacheKey);
+    
+    if (cachedResult) {
+      this.usageStats.cache_hits++;
+      return cachedResult;
+    }
+
+    const systemMessage = this.formatSystemMessage('field mapping');
+    const userMessage = {
+      role: 'user',
+      content: JSON.stringify({
+        input_fields: inputFields,
+        target_schema: targetSchema,
+        mapping_dictionary: this.mappingDictionary[targetSchema],
+        options
+      })
+    };
+
+    const response = await this.makeAPICall(
+      [systemMessage, userMessage],
+      {
+        response_format: { type: 'json_object' },
+        temperature: 0.2
+      }
+    );
+
+    try {
+      const result = JSON.parse(response.content);
+      const mappingResult = {
+        mappings: result.mappings.map(m => ({
+          input_field: m.input_field,
+          output_field: m.output_field,
+          confidence: m.confidence,
+          variations: m.variations || []
+        })),
+        unmapped_fields: result.unmapped_fields || [],
+        overall_confidence: result.overall_confidence,
+        usage_stats: {
+          timestamp: Date.now(),
+          model_used: response.model,
+          token_usage: response.usage
+        }
+      };
+
+      this._updateUsageStats(targetSchema, mappingResult.mappings);
+      this.cacheResponse(cacheKey, mappingResult);
+
+      return mappingResult;
+    } catch (error) {
+      throw new Error('Failed to parse mapping response');
+    }
+  }
+
+  /**
+   * Get usage statistics for field mappings
+   * @returns {Object} Usage statistics
+   */
+  getUsageStats() {
+    return {
+      ...this.usageStats,
+      cache_hit_rate: this.usageStats.total_calls > 0 
+        ? this.usageStats.cache_hits / this.usageStats.total_calls 
+        : 0
+    };
+  }
+
+  /**
+   * Add new field variations to the mapping dictionary
+   * @param {string} schema - Schema type to update
+   * @param {string} field - Field name to update
+   * @param {string[]} variations - New variations to add
+   */
+  addFieldVariations(schema, field, variations) {
+    if (!this.mappingDictionary[schema] || !this.mappingDictionary[schema][field]) {
+      throw new Error(`Invalid schema or field: ${schema}.${field}`);
+    }
+
+    const existingVariations = new Set(this.mappingDictionary[schema][field]);
+    variations.forEach(v => existingVariations.add(v));
+    this.mappingDictionary[schema][field] = Array.from(existingVariations);
   }
 
   /**

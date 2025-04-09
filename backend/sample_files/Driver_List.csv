@@ -1,0 +1,6 @@
+Driver ID,Driver Name,License Number,Vehicle Type,Status,Phone,Join Date
+DRV001,David Wilson,DL123456,Sedan,Active,555-0201,2023-01-10
+DRV002,Sarah Miller,DL123457,SUV,Active,555-0202,2023-02-15
+DRV003,James Taylor,DL123458,Van,Inactive,555-0203,2023-03-20
+DRV004,Lisa Anderson,DL123459,Sedan,Active,555-0204,2023-04-25
+DRV005,Thomas White,DL123460,Truck,Active,555-0205,2023-05-30 

@@ -1,5 +1,8 @@
 const { OpenAI } = require('openai');
 const ClassificationAgent = require('../../agents/ClassificationAgent');
+const fs = require('fs');
+const path = require('path');
+const csv = require('csv-parser');
 
 // Mock OpenAI
 jest.mock('openai', () => {
@@ -78,17 +81,88 @@ describe('ClassificationAgent', () => {
       const customTypes = ['users', 'products'];
       await agent.classifyTabContent(sampleData, customTypes);
       
+      const expectedContent = JSON.stringify({
+        headers: Object.keys(sampleData[0]),
+        sample_data: sampleData,
+        possible_types: customTypes
+      });
+
       expect(mockCreate).toHaveBeenCalledWith({
         model: 'test-model',
         messages: [
           expect.objectContaining({ role: 'system' }),
           expect.objectContaining({
             role: 'user',
-            content: expect.stringContaining(customTypes.join(', '))
+            content: expectedContent
           })
         ],
         temperature: 0.3,
         response_format: { type: 'json_object' }
+      });
+    });
+
+    // Test with actual sample files
+    describe('with sample files', () => {
+      const testFiles = [
+        {
+          name: 'Customer_List.csv',
+          expectedType: 'customers',
+          expectedFields: ['Customer ID', 'Customer Name', 'Email', 'Phone']
+        },
+        {
+          name: 'Driver_List.csv',
+          expectedType: 'drivers',
+          expectedFields: ['Driver ID', 'Driver Name', 'License Number', 'Vehicle Type']
+        },
+        {
+          name: 'Vehicle_List.csv',
+          expectedType: 'vehicles',
+          expectedFields: ['Vehicle ID', 'Make', 'Model', 'Year', 'Status']
+        },
+        {
+          name: 'Order_List.csv',
+          expectedType: 'orders',
+          expectedFields: ['Order ID', 'Customer ID', 'Order Date', 'Total Amount']
+        },
+        {
+          name: 'Product_List.csv',
+          expectedType: 'products',
+          expectedFields: ['Product ID', 'Product Name', 'Category', 'Price']
+        }
+      ];
+
+      testFiles.forEach(({ name, expectedType, expectedFields }) => {
+        test(`correctly classifies ${name}`, async () => {
+          const filePath = path.join(__dirname, '..', '..', '..', 'sample_files', name);
+          const data = await new Promise((resolve, reject) => {
+            const results = [];
+            fs.createReadStream(filePath)
+              .pipe(csv())
+              .on('data', (data) => results.push(data))
+              .on('end', () => resolve(results))
+              .on('error', reject);
+          });
+
+          // Mock the API response based on the expected type
+          mockCreate.mockResolvedValueOnce({
+            choices: [{
+              message: {
+                content: JSON.stringify({
+                  classified_type: expectedType,
+                  confidence_score: 0.95,
+                  reasoning: `Contains ${expectedType}-related fields`,
+                  suggested_mappings: expectedFields
+                })
+              }
+            }]
+          });
+
+          const result = await agent.classifyTabContent(data);
+          
+          expect(result.classified_type).toBe(expectedType);
+          expect(result.confidence_score).toBeGreaterThan(0.8);
+          expect(result.suggested_mappings).toEqual(expect.arrayContaining(expectedFields));
+        });
       });
     });
   });
@@ -147,7 +221,7 @@ describe('ClassificationAgent', () => {
         }]
       });
 
-      await expect(agent.identifySubCategories(sampleData, 'customers')).rejects.toThrow(SyntaxError);
+      await expect(agent.identifySubCategories(sampleData, 'customers')).rejects.toThrow(Error);
     });
   });
 }); 

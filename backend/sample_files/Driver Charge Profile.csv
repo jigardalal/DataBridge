@@ -1,0 +1,5 @@
+Charge Profile Name,Charge Name,Charge Description,Unit of Measure,Effective date based on,Charge Effective Start Date,Charge Effective End Date,Auto Add,Calculate From This Event,Calculate To This Event,If Event,Event Location,If Event 1,Event Time 1,Event Location 1,Zip Code Rule (any in),Zip Code Rule (not in),Load Type Rule (any in),Load Type Rule (not in),Minimum Amount,Free Units,Amount,From Legs,From Leg Event Location,To Legs,To Leg Event Location,Start Distance,End Distance,Driver Group,End Row (Leave blank)
+Profile A,BASE PRICE,,Per Move,,,,Yes,,,Chassis Pick,PT Company,,,,,,IMPORT,,0,0,10.2,,,,,,,Company Drivers,
+Profile B,BASE PRICE,,Per Move,,,,No,Enroute To Chassis,Arrived To Chassis,,,,,,,,IMPORT,,0,0,50,,,,,,,Company Drivers,
+Profile C,BASE PRICE,,Per Day,,,,Yes,,,,,,,,,,,,0,0,50,"Deliver Load, Hook Container","Abington, MA",Return Container,88493,,,Company Drivers,
+Profile D,BASE PRICE,,Per Day,,,,Yes,,,,,Pull Container,Arrived,PT Company,,,,,0,0,90,,,,,,,Company Drivers,

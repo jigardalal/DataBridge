@@ -1,0 +1,6 @@
+Vehicle ID,Make,Model,Year,Status,License Plate,Last Service Date
+VEH001,Toyota,Camry,2022,Active,ABC123,2023-06-01
+VEH002,Honda,CR-V,2021,Active,DEF456,2023-06-15
+VEH003,Ford,Transit,2020,Inactive,GHI789,2023-05-20
+VEH004,Chevrolet,Silverado,2023,Active,JKL012,2023-06-10
+VEH005,Nissan,Altima,2022,Active,MNO345,2023-06-05 

@@ -1,0 +1,2 @@
+Email*,First Name*,Last Name*,Mobile*,Customer ID*,Password*,Loads Permission,Dropped Containers Permission,Account Payable Permission,Info Permission,Billing Permission,Documents Permission,Upload Documents Permission,Payments Permission,Tracking Permission,Service Messaging Permission,Summary Permission,Shipment Tracking Permission,Customer Permission
+valid@gmail.com,Lucy,Doe,1234567890,Company DKK,@1234,TRUE,TRUE,TRUE,TRUE,FALSE,FALSE,FALSE,FALSE,TRUE,TRUE,FALSE,TRUE,TRUE

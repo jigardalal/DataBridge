@@ -1,0 +1,4 @@
+First Name*,Last Name*,Phone,Email*,Password*,System Roles*, Branch*, Custom Role
+John,Doe,(559) 536-9024,johndoe@test.com,123456,Admin, PRO Terminal, dispatcher
+Jane,Doe,(559) 536-9024,johndoe@test.com,123456,"Admin, Sales Agent, CSR", PRO Terminal, Dispatcher
+James,Doe,(559) 536-9024,johndoe@test.com,123456,CSR, PRO Terminal, Dispatcher
