@@ -31,7 +31,7 @@ describe('File Upload API Tests', () => {
     it('should successfully upload and parse an XLSX file', async () => {
       const response = await request(server)
         .post('/api/files/upload')
-        .attach('file', '__tests__/fixtures/valid-test.xlsx');
+        .attach('file', path.join(__dirname, 'fixtures', 'valid-test.xlsx'));
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('fileId');
@@ -48,7 +48,7 @@ describe('File Upload API Tests', () => {
     it('should reject txt files', async () => {
       const response = await request(server)
         .post('/api/files/upload')
-        .attach('file', '__tests__/fixtures/invalid.txt');
+        .attach('file', path.join(__dirname, 'fixtures', 'invalid.txt'));
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error', 'Invalid file type. Only .xlsx files are allowed');
@@ -61,7 +61,7 @@ describe('File Upload API Tests', () => {
     it('should handle empty files', async () => {
       const response = await request(server)
         .post('/api/files/upload')
-        .attach('file', '__tests__/fixtures/empty.xlsx');
+        .attach('file', path.join(__dirname, 'fixtures', 'empty.xlsx'));
 
       expect(response.status).toBe(400);
       expect(response.body).toHaveProperty('error', 'File is empty or contains no valid data');
@@ -77,7 +77,7 @@ describe('File Upload API Tests', () => {
       // First upload a file
       const uploadResponse = await request(server)
         .post('/api/files/upload')
-        .attach('file', '__tests__/fixtures/valid-test.xlsx');
+        .attach('file', path.join(__dirname, 'fixtures', 'valid-test.xlsx'));
 
       const fileId = uploadResponse.body.fileId;
 
