@@ -48,9 +48,8 @@ const upload = multer({
 
 // Error handling middleware
 const handleFileUploadError = (err, req, res, next) => {
-  console.error('File upload error:', err);
-
   if (err instanceof multer.MulterError) {
+    console.error('File upload error:', err);
     if (err.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({ error: 'File size too large. Maximum size is 5MB.' });
     }
@@ -58,6 +57,7 @@ const handleFileUploadError = (err, req, res, next) => {
   }
   
   if (err) {
+    console.error('File upload error:', err);
     return res.status(400).json({ error: err.message });
   }
   
