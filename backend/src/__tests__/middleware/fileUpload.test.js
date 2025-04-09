@@ -1,9 +1,9 @@
 const request = require('supertest');
 const path = require('path');
 const mongoose = require('mongoose');
-const { app, connectDB } = require('../index');
-const FileData = require('../models/FileData');
-const mockConsole = require('./helpers/consoleMock');
+const { app, connectDB } = require('../../index');
+const FileData = require('../../models/FileData');
+const mockConsole = require('../helpers/consoleMock');
 const XLSX = require('xlsx');
 
 let server;

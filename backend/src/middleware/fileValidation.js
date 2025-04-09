@@ -16,21 +16,16 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'text/csv',
-    'application/octet-stream' // Sometimes Excel files are sent with this type
+    'text/csv'
   ];
   
-  // Check mime type
-  if (!allowedTypes.includes(file.mimetype)) {
-    console.log('Invalid mime type:', file.mimetype);
-    return cb(new Error('Invalid file type. Only .xlsx files are allowed'), false);
-  }
-
-  // Check file extension
+  // Check mime type and file extension together
   const ext = path.extname(file.originalname).toLowerCase();
-  if (!['.xlsx', '.xls', '.csv'].includes(ext)) {
-    console.log('Invalid file extension:', ext);
-    return cb(new Error('Invalid file type. Only .xlsx files are allowed'), false);
+  const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+  
+  if (!allowedTypes.includes(file.mimetype) || !allowedExtensions.includes(ext)) {
+    console.log('Invalid file type:', { mimetype: file.mimetype, extension: ext });
+    return cb(new Error('Invalid file type. Only Excel (.xlsx, .xls) and CSV files are allowed'), false);
   }
 
   console.log('File validation passed');

@@ -1,7 +1,7 @@
 const request = require('supertest');
 const mongoose = require('mongoose');
-const { app, connectDB } = require('../index');
-const mockConsole = require('./helpers/mockConsole');
+const { app, connectDB } = require('../../index');
+const mockConsole = require('../helpers/mockConsole');
 
 describe('Server Setup', () => {
   let consoleSpy;

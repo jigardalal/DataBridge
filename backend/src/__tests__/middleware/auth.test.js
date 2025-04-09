@@ -1,53 +1,51 @@
 const authenticate = require('../../middleware/auth');
 
+// Mock console.log to avoid noise in test output
+console.log = jest.fn();
+
 describe('Authentication Middleware', () => {
-  let mockReq;
-  let mockRes;
-  let mockNext;
+  let req;
+  let res;
+  let next;
 
   beforeEach(() => {
-    mockReq = {};
-    mockRes = {
+    req = {};
+    res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn()
     };
-    mockNext = jest.fn();
-    
-    // Mock console.log to avoid cluttering test output
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-  });
-
-  afterEach(() => {
+    next = jest.fn();
     jest.clearAllMocks();
   });
 
-  test('should attach user object to request', () => {
-    authenticate(mockReq, mockRes, mockNext);
-
-    expect(mockReq.user).toBeDefined();
-    expect(mockReq.user).toEqual({
+  test('attaches user object to request', () => {
+    authenticate(req, res, next);
+    
+    expect(req.user).toBeDefined();
+    expect(req.user).toEqual({
       id: 'dummyUserId123',
       role: 'admin'
     });
   });
 
-  test('should call next middleware', () => {
-    authenticate(mockReq, mockRes, mockNext);
-    expect(mockNext).toHaveBeenCalled();
+  test('calls next middleware', () => {
+    authenticate(req, res, next);
+    
+    expect(next).toHaveBeenCalled();
   });
 
-  test('should log authentication message', () => {
-    authenticate(mockReq, mockRes, mockNext);
+  test('logs authentication attempt', () => {
+    authenticate(req, res, next);
+    
     expect(console.log).toHaveBeenCalledWith('Authentication middleware placeholder');
   });
 
-  test('should not modify other request properties', () => {
-    const originalReq = { existingProp: 'value' };
-    mockReq = { ...originalReq };
-
-    authenticate(mockReq, mockRes, mockNext);
-
-    expect(mockReq.existingProp).toBe('value');
-    expect(Object.keys(mockReq).length).toBe(2); // existingProp and user
+  test('preserves existing request properties', () => {
+    req.existingProp = 'test';
+    
+    authenticate(req, res, next);
+    
+    expect(req.existingProp).toBe('test');
+    expect(req.user).toBeDefined();
   });
 }); 

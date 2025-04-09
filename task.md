@@ -31,10 +31,10 @@
 - [X] Integrate `sheetjs` to parse Excel files and normalize all tabs to JSON
 - [X] Create input validation layer to catch obvious issues before AI processing
 - [X] Store raw data in MongoDB (GridFS or pointer to file store) - *(RawFile schema created)*
-- [ ] Develop specialized OpenAI agents:
-  - [ ] Classification agent to identify tab content types
-  - [ ] Mapping agent to align fields with output schema
-  - [ ] Validation agent to detect anomalies and data issues
+- [X] Develop specialized OpenAI agents:
+  - [X] Classification agent to identify tab content types
+  - [X] Mapping agent to align fields with output schema
+  - [X] Validation agent to detect anomalies and data issues
 - [ ] Implement caching strategy for AI responses to reduce costs
 - [ ] Design and implement token budget management system
 - [X] Save processed data with tags and metadata - *(ProcessedData schema created)*
@@ -101,6 +101,11 @@
   - [ ] RawFile model tests
 - [ ] Create tests for controllers
 - [ ] Create tests for utility functions
+- [ ] Create tests for AI agents:
+  - [ ] BaseAgent tests (token counting, caching, API calls)
+  - [ ] ClassificationAgent tests (content type identification, sub-categories)
+  - [ ] MappingAgent tests (field mapping, transformations, refinement)
+  - [ ] ValidationAgent tests (anomaly detection, fixes, outlier analysis)
 - [ ] Set up integration tests
 - [ ] Set up end-to-end tests with Cypress or Playwright
 
