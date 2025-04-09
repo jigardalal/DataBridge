@@ -5,6 +5,7 @@ describe('File Validation Middleware', () => {
   let mockReq;
   let mockRes;
   let nextFunction;
+  let consoleErrorSpy;
 
   beforeEach(() => {
     mockReq = {};
@@ -13,6 +14,13 @@ describe('File Validation Middleware', () => {
       json: jest.fn()
     };
     nextFunction = jest.fn();
+    // Mock console.error before each test
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    // Restore console.error after each test
+    consoleErrorSpy.mockRestore();
   });
 
   it('should handle multer file size error', () => {
@@ -24,6 +32,7 @@ describe('File Validation Middleware', () => {
     expect(mockRes.json).toHaveBeenCalledWith({
       error: 'File size too large. Maximum size is 5MB.'
     });
+    expect(consoleErrorSpy).toHaveBeenCalledWith('File upload error:', err);
   });
 
   it('should handle other multer errors', () => {
@@ -36,6 +45,7 @@ describe('File Validation Middleware', () => {
     expect(mockRes.json).toHaveBeenCalledWith({
       error: 'Upload error: Test error message'
     });
+    expect(consoleErrorSpy).toHaveBeenCalledWith('File upload error:', err);
   });
 
   it('should handle non-multer errors', () => {
@@ -47,6 +57,7 @@ describe('File Validation Middleware', () => {
     expect(mockRes.json).toHaveBeenCalledWith({
       error: 'Custom error message'
     });
+    expect(consoleErrorSpy).toHaveBeenCalledWith('File upload error:', err);
   });
 
   it('should call next if no error', () => {
@@ -55,5 +66,6 @@ describe('File Validation Middleware', () => {
     expect(nextFunction).toHaveBeenCalled();
     expect(mockRes.status).not.toHaveBeenCalled();
     expect(mockRes.json).not.toHaveBeenCalled();
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 }); 
