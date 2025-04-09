@@ -61,7 +61,7 @@ const parseFile = async (req, res) => {
     // Validate data
     if (filteredData.length === 0) {
       console.log('File is empty after filtering blank rows');
-      return res.status(400).json({ error: 'File is empty or contains only blank rows' });
+      return res.status(400).json({ error: 'File is empty or contains no valid data' });
     }
 
     // Extract headers and data
@@ -94,8 +94,8 @@ const parseFile = async (req, res) => {
     await fileData.save();
     console.log('Data saved to database. FileId:', fileData._id);
 
-    res.status(201).json({
-      message: 'File uploaded and parsed successfully',
+    res.status(200).json({
+      message: 'File uploaded and processed successfully',
       fileId: fileData._id,
       rowCount: fileData.rowCount,
       headers: fileData.columnHeaders,
@@ -115,7 +115,7 @@ const getFileData = async (req, res) => {
     const fileData = await FileData.findById(fileId);
     
     if (!fileData) {
-      return res.status(404).json({ error: 'File data not found' });
+      return res.status(404).json({ error: 'File not found' });
     }
 
     res.json(fileData);

@@ -23,14 +23,14 @@ const fileFilter = (req, file, cb) => {
   // Check mime type
   if (!allowedTypes.includes(file.mimetype)) {
     console.log('Invalid mime type:', file.mimetype);
-    return cb(new Error(`Invalid file type: ${file.mimetype}. Only .xlsx, .xls, and .csv files are allowed.`), false);
+    return cb(new Error('Invalid file type. Only .xlsx files are allowed'), false);
   }
 
   // Check file extension
   const ext = path.extname(file.originalname).toLowerCase();
   if (!['.xlsx', '.xls', '.csv'].includes(ext)) {
     console.log('Invalid file extension:', ext);
-    return cb(new Error(`Invalid file extension: ${ext}. Only .xlsx, .xls, and .csv files are allowed.`), false);
+    return cb(new Error('Invalid file type. Only .xlsx files are allowed'), false);
   }
 
   console.log('File validation passed');

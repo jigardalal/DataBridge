@@ -8,8 +8,6 @@ const authenticate = require('./middleware/auth');
 const errorHandler = require('./middleware/errorHandler');
 const fileRoutes = require('./routes/fileRoutes');
 
-connectDB();
-
 const app = express();
 
 // Configure CORS
@@ -28,7 +26,7 @@ app.use(helmet({
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Temporarily remove authentication for testing
+// Routes
 app.use('/api/files', fileRoutes);
 
 app.get('/health', (req, res) => {
@@ -37,5 +35,11 @@ app.get('/health', (req, res) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3002;
-app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+// Only connect to database and start server if this file is run directly
+if (require.main === module) {
+  connectDB();
+  const PORT = process.env.PORT || 3002;
+  app.listen(PORT, () => console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
+}
+
+module.exports = { app, connectDB };
