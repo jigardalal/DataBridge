@@ -1,5 +1,6 @@
 const XLSX = require('xlsx');
 const FileData = require('../models/FileData');
+const RawFile = require('../models/RawFile');
 
 const isRowEmpty = (row) => {
   if (!row) return true;
@@ -13,109 +14,87 @@ const isRowEmpty = (row) => {
 
 const parseFile = async (req, res) => {
   try {
-    console.log('File upload request received');
-    
     if (!req.file) {
-      console.log('No file received in request');
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    console.log('File received:', {
-      filename: req.file.originalname,
-      size: req.file.size,
-      mimetype: req.file.mimetype
+    console.log('Received file:', {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
     });
 
-    // Get file extension
-    const fileType = req.file.originalname.split('.').pop().toLowerCase();
-    
-    // Parse file based on type
+    // Save raw file metadata
+    const rawFile = new RawFile({
+      originalName: req.file.originalname,
+      fileType: req.file.mimetype,
+      fileSize: req.file.size || 0,
+      storageUrl: 'memory'
+    });
+    await rawFile.save();
+
+    // Parse Excel or CSV
     let workbook;
     try {
-      if (fileType === 'csv') {
+      const ext = req.file.originalname.split('.').pop().toLowerCase();
+      if (ext === 'csv') {
         workbook = XLSX.read(req.file.buffer.toString(), { type: 'string' });
       } else {
         workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
       }
-      console.log('File parsed successfully');
-    } catch (parseError) {
-      console.error('Error parsing file:', parseError);
-      return res.status(400).json({ error: 'Error parsing file. Please ensure it is a valid Excel/CSV file.' });
+    } catch (error) {
+      console.error('Error parsing file:', error);
+      return res.status(400).json({ error: 'Invalid file format' });
     }
 
-    // Get the first worksheet
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-
-    // Convert to JSON
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    console.log(`Converted to JSON. Total rows before filtering: ${jsonData.length}`);
 
-    // Filter out empty rows
+    const totalRowsBeforeFiltering = jsonData.length;
     const filteredData = jsonData.filter(row => !isRowEmpty(row));
-    console.log(`Rows after filtering empty rows: ${filteredData.length}`);
+    const blankRowsRemoved = totalRowsBeforeFiltering - filteredData.length;
 
-    // Validate data
     if (filteredData.length === 0) {
-      console.log('File is empty after filtering blank rows');
-      return res.status(400).json({ error: 'File is empty or contains no valid data' });
+      return res.status(400).json({ error: 'File is empty or invalid' });
     }
 
-    // Extract headers and data
-    const [headers, ...data] = filteredData;
-    console.log('Headers:', headers);
+    const [headers, ...rows] = filteredData;
 
-    // Validate headers
-    if (!headers || headers.length === 0) {
-      console.log('No headers found in file');
-      return res.status(400).json({ error: 'File must contain column headers' });
-    }
+    const validRows = rows.filter(row => !isRowEmpty(row));
 
-    // Filter out any remaining rows that might be empty after header extraction
-    const validData = data.filter(row => !isRowEmpty(row));
-    console.log(`Valid data rows: ${validData.length}`);
+    const ext = req.file.originalname.split('.').pop().toLowerCase();
+    const fileType = ['xlsx', 'xls', 'csv'].includes(ext) ? ext : 'xlsx';
 
-    // Create file data record
     const fileData = new FileData({
       fileName: req.file.originalname,
       fileType,
-      data: validData.map(row => {
-        const rowData = {};
-        headers.forEach((header, index) => {
-          // Only add non-empty values
-          if (row[index] !== undefined && row[index] !== null && String(row[index]).trim() !== '') {
-            rowData[header] = row[index];
-          }
-        });
-        return rowData;
-      }),
-      rowCount: validData.length,
       columnHeaders: headers,
-      totalRowsBeforeFiltering: jsonData.length,
-      blankRowsRemoved: jsonData.length - filteredData.length
+      rowCount: validRows.length,
+      totalRowsBeforeFiltering,
+      blankRowsRemoved,
+      data: validRows.map(row => {
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = row[idx];
+        });
+        return obj;
+      })
     });
 
-    // Save to database
-    try {
-      await fileData.save();
-      console.log('Data saved to database. FileId:', fileData._id);
-    } catch (dbError) {
-      console.error('Database error:', dbError);
-      return res.status(500).json({ error: 'Error saving file data to database' });
-    }
+    await fileData.save();
 
     res.status(200).json({
       message: 'File uploaded and processed successfully',
       fileId: fileData._id,
-      rowCount: fileData.rowCount,
-      headers: fileData.columnHeaders,
-      totalRowsBeforeFiltering: fileData.totalRowsBeforeFiltering,
-      blankRowsRemoved: fileData.blankRowsRemoved
+      fileDataId: fileData._id,
+      rawFileId: rawFile._id,
+      headers,
+      rowCount: validRows.length
     });
-
   } catch (error) {
-    console.error('File parsing error:', error);
-    res.status(500).json({ error: 'Error processing file: ' + error.message });
+    console.error('File upload error:', error);
+    res.status(500).json({ error: 'File upload failed' });
   }
 };
 
@@ -135,7 +114,18 @@ const getFileData = async (req, res) => {
   }
 };
 
+const listFiles = async (req, res) => {
+  try {
+    const files = await FileData.find({}, '_id fileName createdAt updatedAt rowCount');
+    res.json(files);
+  } catch (error) {
+    console.error('Error listing files:', error);
+    res.status(500).json({ error: 'Error listing files' });
+  }
+};
+
 module.exports = {
   parseFile,
-  getFileData
+  getFileData,
+  listFiles
 };

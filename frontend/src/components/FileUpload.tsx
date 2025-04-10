@@ -92,7 +92,15 @@ export const FileUpload: React.FC = () => {
         console.log('FormData entry:', pair[0], pair[1]);
       }
 
-      const response = await uploadDataset(formData);
+      const data = await uploadDataset(formData);
+      console.log('Upload response:', data);
+
+      // Extract fileId from response
+      const fileId = data.fileId;
+      if (fileId) {
+        console.log('Uploaded fileId:', fileId);
+        // TODO: Pass fileId to parent or store in context/global state
+      }
       
       setFiles(prev => prev.map(f => 
         f === file ? { ...f, status: 'success', progress: 100 } : f

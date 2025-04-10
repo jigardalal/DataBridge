@@ -11,23 +11,40 @@ const seed = async () => {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB');
 
-    const customerFields = [
-      'Customer ID',
-      'Customer Name',
-      'Email Address',
-      'Phone Number',
-      'Street Address',
-      'Customer Status',
-      'Registration Date'
+    const categories = [
+      "Charge Profile",
+      "Trucks",
+      "Customers",
+      "Order List",
+      "Driver Charge Profile",
+      "Chassis",
+      "Carrier Tariff",
+      "Vehicle List",
+      "Users",
+      "Customer Employee",
+      "Driver List",
+      "Drivers",
+      "Trailers",
+      "Product List",
+      "Fleet Owner",
+      "TestDataForImport.xlsx",
+      "Carrier",
+      "Customer List",
+      "Carrier Charge Profile",
+      "Chassis Owner",
+      "Load Tariff",
+      "Driver Tariff"
     ];
 
-    await MappingOptions.findOneAndUpdate(
-      { schemaType: 'customer' },
-      { fields: customerFields },
-      { upsert: true, new: true }
-    );
+    for (const category of categories) {
+      await MappingOptions.findOneAndUpdate(
+        { dataCategory: category },
+        { fields: [] },
+        { upsert: true, new: true }
+      );
+    }
 
-    console.log('Seeded MappingOptions for customer');
+    console.log('Seeded MappingOptions with data categories');
     process.exit(0);
   } catch (error) {
     console.error('Seeding error:', error);

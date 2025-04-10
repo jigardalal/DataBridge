@@ -67,21 +67,21 @@ class ValidationAgent extends BaseAgent {
   }
 
   /**
-   * Validate data against schema rules
+   * Validate data against rules for a data category
    * @param {Object[]} data - Array of data objects to validate
-   * @param {string} schemaType - Type of schema to validate against
+   * @param {string} dataCategory - Data category to validate against
    * @returns {Promise<ValidationResult>} Validation results
    */
-  async validateData(data, schemaType) {
+  async validateData(data, dataCategory) {
     if (!data || !data.length) {
       throw new Error('No data provided for validation');
     }
 
-    if (!this.validationRules[schemaType]) {
-      throw new Error(`Unknown schema type: ${schemaType}`);
+    if (!this.validationRules[dataCategory]) {
+      throw new Error(`Unknown data category: ${dataCategory}`);
     }
 
-    const rules = this.validationRules[schemaType];
+    const rules = this.validationRules[dataCategory];
     const errors = [];
     const stats = {
       total_records: data.length,
@@ -159,7 +159,7 @@ class ValidationAgent extends BaseAgent {
     }
 
     // Use AI to detect inconsistencies
-    const aiErrors = await this._detectInconsistencies(data, schemaType);
+    const aiErrors = await this._detectInconsistencies(data, dataCategory);
     errors.push(...aiErrors);
     stats.error_count += aiErrors.length;
 
@@ -174,17 +174,17 @@ class ValidationAgent extends BaseAgent {
    * Use AI to detect data inconsistencies
    * @private
    * @param {Object[]} data - Data to analyze
-   * @param {string} schemaType - Schema type
+   * @param {string} dataCategory - Data category
    * @returns {Promise<ValidationError[]>} Detected inconsistencies
    */
-  async _detectInconsistencies(data, schemaType) {
+  async _detectInconsistencies(data, dataCategory) {
     const systemMessage = this.formatSystemMessage('data validation');
     const userMessage = {
       role: 'user',
       content: JSON.stringify({
         data,
-        schema_type: schemaType,
-        validation_rules: this.validationRules[schemaType]
+        schema_type: dataCategory,
+        validation_rules: this.validationRules[dataCategory]
       })
     };
 
@@ -255,11 +255,11 @@ class ValidationAgent extends BaseAgent {
    * Validate a single field value
    * @param {string} field - Field name
    * @param {any} value - Field value
-   * @param {string} schemaType - Schema type
+   * @param {string} dataCategory - Data category
    * @returns {ValidationError[]} Validation errors
    */
-  validateField(field, value, schemaType) {
-    const rules = this.validationRules[schemaType];
+  validateField(field, value, dataCategory) {
+    const rules = this.validationRules[dataCategory];
     const errors = [];
 
     // Check if field is required
@@ -293,4 +293,4 @@ class ValidationAgent extends BaseAgent {
   }
 }
 
-module.exports = ValidationAgent; 
+module.exports = ValidationAgent;

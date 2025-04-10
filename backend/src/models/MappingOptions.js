@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const mappingOptionsSchema = new mongoose.Schema({
-  schemaType: {
+  dataCategory: {
     type: String,
     required: true,
     unique: true

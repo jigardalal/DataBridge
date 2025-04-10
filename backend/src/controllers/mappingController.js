@@ -1,11 +1,10 @@
 const MappingDictionary = require('../models/MappingDictionary');
 const MappingOptions = require('../models/MappingOptions');
-// const MappingAgent = require('../agents/MappingAgent'); // Uncomment when integrating
 
 module.exports = {
-  // GET /api/mappings/:schemaType
+  // GET /api/mappings/:dataCategory
   async getMappings(req, res) {
-    const { schemaType } = req.params;
+    const { dataCategory } = req.params;
     const { fileId } = req.query;
     try {
       const MappingAgent = require('../agents/MappingAgent');
@@ -23,7 +22,6 @@ module.exports = {
         }
       }
 
-      // fallback if no fileId or no headers found
       if (inputFields.length === 0) {
         inputFields = [
           'Customer ID',
@@ -36,11 +34,10 @@ module.exports = {
         ];
       }
 
-      const mappingResult = await agent.mapFields(inputFields, schemaType);
-      const optionsDoc = await MappingOptions.findOne({ schemaType });
+      const mappingResult = await agent.mapFields(inputFields, dataCategory);
+      const optionsDoc = await MappingOptions.findOne({ dataCategory });
       const dropdownOptions = optionsDoc ? optionsDoc.fields : [];
 
-      // Map schema keys to labels for dropdown pre-selection
       const schemaKeyToLabel = {
         id: 'Customer ID',
         name: 'Customer Name',
@@ -64,18 +61,16 @@ module.exports = {
       });
     } catch (error) {
       console.error('Error generating mappings:', error);
-      console.error(error.stack);
-      res.status(500).json({ error: error.message, stack: error.stack });
+      res.status(500).json({ error: error.message });
     }
   },
 
-  // PATCH /api/mappings/:schemaType
+  // PATCH /api/mappings/:dataCategory
   async updateMappings(req, res) {
-    const { schemaType } = req.params;
+    const { dataCategory } = req.params;
     const { updatedMappings } = req.body;
-    // TODO: Update mappings based on user adjustments
     res.json({
-      schemaType,
+      dataCategory,
       updatedMappings,
       message: 'Stub: update mappings with user adjustments'
     });
@@ -113,6 +108,17 @@ module.exports = {
       res.json(template);
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  },
+
+  // GET /api/data-categories
+  async listDataCategories(req, res) {
+    try {
+      const dataCategories = await MappingOptions.distinct('dataCategory');
+      res.json(dataCategories);
+    } catch (error) {
+      console.error('Error fetching data categories:', error);
+      res.status(500).json({ error: 'Error fetching data categories' });
     }
   }
 };
