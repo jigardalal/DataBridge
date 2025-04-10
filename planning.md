@@ -104,7 +104,7 @@ This project aims to streamline the onboarding process for customers using intel
 - Dockerize all services (early in development process)
 - Deploy to AWS ECS (EFS/S3 for storage)
 - GitHub Actions or AWS CodePipeline:
-  - Lint/test → Docker build → Push to ECR → Deploy to ECS
+  - Lint → Docker build → Push to ECR → Deploy to ECS
 - Version control for prompt templates + schema/mapping dictionaries
 - Implement token budget management for AI calls
 - Add rate limiting to API endpoints

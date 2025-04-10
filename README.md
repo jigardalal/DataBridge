@@ -108,11 +108,6 @@ databridge/
 │   │   ├── models/        # Mongoose models
 │   │   ├── routes/        # API routes
 │   │   └── utils/         # Utility functions
-│   ├── __tests__/        # Test files
-│   │   ├── agents/       # Agent test suites
-│   │   ├── controllers/  # Controller tests
-│   │   ├── middleware/   # Middleware tests
-│   │   └── models/       # Model tests
 │   └── package.json
 │
 ├── frontend/              # React application
@@ -133,41 +128,6 @@ databridge/
 ├── docs/                 # Documentation
 └── docker-compose.yml
 ```
-
-## Testing
-
-### Running Tests
-
-```bash
-# Run all tests
-cd backend
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-### Test Structure
-- Unit tests are located in `__tests__` directories
-- Tests follow the same structure as the source code
-- Each test file is named `*.test.js`
-
-### Continuous Integration
-- GitHub Actions automatically runs tests on push and pull requests
-- Tests run on Node.js 16.x and 18.x
-- Coverage reports are generated and uploaded as artifacts
-- PRs require passing tests before merging
-
-### Coverage Requirements
-- All new code should include tests
-- Aim for 80% coverage on:
-  - Statements
-  - Branches
-  - Functions
-  - Lines
 
 ## Docker Deployment
 
@@ -246,51 +206,5 @@ Response:
   "dailyLimit": 100000,
   "perRequestLimit": 1000,
   "usageHistory": [...]
-}
-```
-
-#### Check Token Limits
-```bash
-POST http://localhost:3002/api/tokens/check
-Content-Type: application/json
-
-{
-  "estimatedTokens": 100
-}
-```
-
-Response:
-```json
-{
-  "allowed": true,
-  "remaining": 95000
-}
-```
-
-### Cache Management API
-
-#### Get Cache Stats
-```bash
-GET http://localhost:3002/api/cache/stats
-```
-
-Response:
-```json
-{
-  "connected_clients": 1,
-  "used_memory": "2.5MB",
-  "total_keys": 50
-}
-```
-
-#### Clear Cache
-```bash
-DELETE http://localhost:3002/api/cache/clear
-```
-
-Response:
-```json
-{
-  "message": "Cache cleared successfully"
 }
 ```

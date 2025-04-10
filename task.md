@@ -40,7 +40,6 @@
     - [X] Detect duplicate values
     - [X] Use AI for inconsistency detection
     - [X] Provide fix suggestions
-    - [X] Add comprehensive test suite
 - [X] Implement caching strategy for AI responses to reduce costs
 - [X] Design and implement token budget management system
 - [X] Save processed data with tags and metadata - *(ProcessedData schema created)*
@@ -89,35 +88,11 @@
 - [ ] Configure S3 or EFS for file storage
 - [X] Implement rate limiting for API endpoints - *(Dependency installed)*
 - [X] Create CI/CD pipeline with GitHub Actions or AWS CodePipeline:
-  - [X] Lint and unit test
+  - [X] Lint
   - [ ] Build Docker images
   - [ ] Push to ECR
   - [ ] Deploy to ECS
 - [ ] Version prompt templates and mapping dictionaries
-
-## Testing Infrastructure (New Section)
-- [X] Set up Jest testing framework
-- [X] Configure GitHub Actions for automated testing
-- [X] Create comprehensive middleware tests:
-  - [X] Upload middleware tests
-  - [X] Error handler middleware tests
-  - [X] Authentication middleware tests
-- [X] Create comprehensive agent tests:
-  - [X] BaseAgent tests
-  - [X] ClassificationAgent tests
-  - [X] MappingAgent tests
-  - [X] ValidationAgent tests
-- [ ] Add test coverage thresholds
-- [ ] Create tests for models:
-  - [ ] Dataset model tests
-  - [ ] AnomalyReport model tests
-  - [ ] MappingDictionary model tests
-  - [ ] ProcessedData model tests
-  - [ ] RawFile model tests
-- [ ] Create tests for controllers
-- [ ] Create tests for utility functions
-- [ ] Set up integration tests
-- [ ] Set up end-to-end tests with Cypress or Playwright
 
 ## Optional Enhancements
 - [ ] Add Redis-based job queue for background file processing
@@ -141,4 +116,3 @@
 - [ ] Add monitoring dashboard for token usage and cache performance
 - [ ] Implement rate limiting based on token usage
 - [ ] Add cache warming for frequently accessed data
-- [ ] Create automated tests for token and cache services
