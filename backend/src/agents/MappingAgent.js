@@ -116,6 +116,41 @@ class MappingAgent extends BaseAgent {
       throw new Error(`Unknown schema type: ${targetSchema}`);
     }
 
+    // FAST MODE: skip LLM call, use dictionary heuristic
+    if (process.env.FAST_MAPPING === 'true') {
+      const mappings = [];
+      const unmapped_fields = [];
+
+      inputFields.forEach(input => {
+        let matched = false;
+        for (const [key, variations] of Object.entries(this.mappingDictionary[targetSchema])) {
+          if (variations.map(v => v.toLowerCase()).includes(input.toLowerCase())) {
+            mappings.push({
+              input_field: input,
+              output_field: key,
+              confidence: 0.9
+            });
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          unmapped_fields.push(input);
+        }
+      });
+
+      return {
+        mappings,
+        unmapped_fields,
+        overall_confidence: mappings.length / inputFields.length,
+        usage_stats: {
+          timestamp: Date.now(),
+          model_used: 'fast-mode',
+          token_usage: 0
+        }
+      };
+    }
+
     this.usageStats.total_calls++;
     const cacheKey = this._generateMappingCacheKey(inputFields, targetSchema);
     const cachedResult = this.getCachedResponse(cacheKey);
@@ -128,12 +163,25 @@ class MappingAgent extends BaseAgent {
     const systemMessage = this.formatSystemMessage('field mapping');
     const userMessage = {
       role: 'user',
-      content: JSON.stringify({
-        input_fields: inputFields,
-        target_schema: targetSchema,
-        mapping_dictionary: this.mappingDictionary[targetSchema],
-        options
-      })
+      content:
+        "Respond ONLY in JSON format with the following structure:\n" +
+        `{
+  "mappings": [
+    {
+      "input_field": "...",
+      "output_field": "...",
+      "confidence": 0.95
+    }
+  ],
+  "unmapped_fields": ["..."],
+  "overall_confidence": 0.9
+}\n` +
+        JSON.stringify({
+          input_fields: inputFields,
+          target_schema: targetSchema,
+          mapping_dictionary: this.mappingDictionary[targetSchema],
+          options
+        })
     };
 
     const response = await this.makeAPICall(
@@ -145,6 +193,7 @@ class MappingAgent extends BaseAgent {
     );
 
     try {
+      console.log('Raw OpenAI response content:', response.content);
       const result = JSON.parse(response.content);
       const mappingResult = {
         mappings: result.mappings.map(m => ({
@@ -167,6 +216,7 @@ class MappingAgent extends BaseAgent {
 
       return mappingResult;
     } catch (error) {
+      console.error('Failed to parse mapping response:', response.content);
       throw new Error('Failed to parse mapping response');
     }
   }
@@ -314,4 +364,4 @@ Provide your response in JSON format with:
   }
 }
 
-module.exports = MappingAgent; 
+module.exports = MappingAgent;

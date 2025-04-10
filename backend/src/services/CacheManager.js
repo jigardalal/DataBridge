@@ -3,7 +3,13 @@ const { promisify } = require('util');
 
 class CacheManager {
   constructor(config = {}) {
-    this.redis = new Redis(config.redisUrl || 'redis://localhost:6379');
+    this.disabled = process.env.DISABLE_REDIS === 'true';
+    if (this.disabled) {
+      console.warn('Redis caching is disabled.');
+      this.redis = null;
+    } else {
+      this.redis = new Redis(config.redisUrl || 'redis://localhost:6379');
+    }
     this.defaultTTL = config.defaultTTL || 3600; // 1 hour in seconds
     this.maxCacheSize = config.maxCacheSize || 1000; // Maximum number of cached items
   }
@@ -23,6 +29,7 @@ class CacheManager {
    * @returns {Promise<Object|null>} Cached response or null
    */
   async get(key) {
+    if (this.disabled) return null;
     try {
       const cached = await this.redis.get(key);
       return cached ? JSON.parse(cached) : null;
@@ -39,6 +46,7 @@ class CacheManager {
    * @param {number} ttl - Time to live in seconds
    */
   async set(key, value, ttl = this.defaultTTL) {
+    if (this.disabled) return;
     try {
       await this.redis.setex(key, ttl, JSON.stringify(value));
     } catch (error) {
@@ -51,6 +59,7 @@ class CacheManager {
    * @param {string} key - Cache key
    */
   async delete(key) {
+    if (this.disabled) return;
     try {
       await this.redis.del(key);
     } catch (error) {
@@ -62,6 +71,7 @@ class CacheManager {
    * Clear all cache entries
    */
   async clear() {
+    if (this.disabled) return;
     try {
       await this.redis.flushall();
     } catch (error) {
@@ -74,6 +84,7 @@ class CacheManager {
    * @returns {Promise<Object>} Cache statistics
    */
   async getStats() {
+    if (this.disabled) return null;
     try {
       const info = await this.redis.info();
       const stats = {
@@ -93,6 +104,7 @@ class CacheManager {
    * @returns {Promise<boolean>} Cache health status
    */
   async isHealthy() {
+    if (this.disabled) return false;
     try {
       await this.redis.ping();
       return true;
@@ -103,4 +115,4 @@ class CacheManager {
   }
 }
 
-module.exports = CacheManager; 
+module.exports = CacheManager;

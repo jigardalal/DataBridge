@@ -40,6 +40,8 @@ app.use('/api/files', fileRoutes);
 app.use('/api/export', exportRoutes);
 app.use('/api/tokens', tokenRoutes);
 app.use('/api/cache', cacheRoutes);
+app.use('/api', require('./routes/mappingRoutes'));
+app.use('/api', require('./routes/datasetRoutes'));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP' });
