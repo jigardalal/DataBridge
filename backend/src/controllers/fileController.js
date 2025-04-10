@@ -2,16 +2,13 @@ const XLSX = require('xlsx');
 const FileData = require('../models/FileData');
 
 const isRowEmpty = (row) => {
-  // Check if row is undefined or null
   if (!row) return true;
-  
-  // Check if all values in the row are empty
-  return row.every(value => 
-    value === undefined || 
-    value === null || 
-    value === '' || 
-    String(value).trim() === ''
-  );
+
+  return row.every(value => {
+    if (value === undefined || value === null) return true;
+    const str = String(value).replace(/\s/g, '');
+    return str === '';
+  });
 };
 
 const parseFile = async (req, res) => {
@@ -53,6 +50,11 @@ const parseFile = async (req, res) => {
     // Convert to JSON
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     console.log(`Converted to JSON. Total rows before filtering: ${jsonData.length}`);
+
+    // Debug: print each row and emptiness status
+    jsonData.forEach((row, idx) => {
+      console.log(`Row ${idx}:`, row, 'Is empty:', isRowEmpty(row));
+    });
 
     // Filter out empty rows
     const filteredData = jsonData.filter(row => !isRowEmpty(row));
@@ -128,4 +130,4 @@ const getFileData = async (req, res) => {
 module.exports = {
   parseFile,
   getFileData
-}; 
+};

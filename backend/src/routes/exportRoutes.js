@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const exportController = require('../controllers/ExportController');
-const { authenticate } = require('../middleware/auth');
+const exportController = require('../controllers/exportController');
+const authenticate = require('../middleware/auth');
 
 /**
  * @swagger
@@ -43,7 +43,7 @@ const { authenticate } = require('../middleware/auth');
  *       500:
  *         description: Server error
  */
-router.post('/', exportController.exportData);
+router.post('/', authenticate, exportController.exportData);
 
 /**
  * @swagger
@@ -56,19 +56,9 @@ router.post('/', exportController.exportData);
  *         required: true
  *         schema:
  *           type: string
- *         description: Type of entity
  *     responses:
  *       200:
- *         description: Available fields
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 fields:
- *                   type: array
- *                   items:
- *                     type: string
+ *         description: List of available fields
  *       400:
  *         description: Invalid request
  *       404:
@@ -76,10 +66,34 @@ router.post('/', exportController.exportData);
  *       500:
  *         description: Server error
  */
-router.get('/fields/:entityType', exportController.getAvailableFields);
+router.get('/fields/:entityType', authenticate, exportController.getExportOptions);
 
-// Export routes
-router.get('/:dataType/options', authenticate, exportController.getExportOptions);
-router.post('/:dataType/csv', authenticate, exportController.exportToCSV);
+/**
+ * @swagger
+ * /api/export/csv:
+ *   post:
+ *     summary: Export data to CSV
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               data:
+ *                 type: array
+ *                 description: Data to export
+ *               options:
+ *                 type: object
+ *                 description: CSV export options
+ *     responses:
+ *       200:
+ *         description: CSV file
+ *       400:
+ *         description: Invalid request
+ *       500:
+ *         description: Server error
+ */
+router.post('/csv', authenticate, exportController.exportToCSV);
 
-module.exports = router; 
+module.exports = router;

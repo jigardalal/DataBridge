@@ -12,15 +12,19 @@ const fileFilter = (req, file, cb) => {
     size: file.size
   });
 
+  const ext = path.extname(file.originalname).toLowerCase();
+  console.log('FileFilter received:', file.mimetype, ext);
+
   // Allowed file types
   const allowedTypes = [
     'application/vnd.ms-excel',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    'text/csv'
+    'text/csv',
+    'application/octet-stream',
+    'application/zip'
   ];
   
   // Check mime type and file extension together
-  const ext = path.extname(file.originalname).toLowerCase();
   const allowedExtensions = ['.xlsx', '.xls', '.csv'];
   
   if (!allowedTypes.includes(file.mimetype) || !allowedExtensions.includes(ext)) {
@@ -62,4 +66,4 @@ const handleFileUploadError = (err, req, res, next) => {
 module.exports = {
   upload,
   handleFileUploadError
-}; 
+};

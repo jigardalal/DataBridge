@@ -13,6 +13,12 @@ const cacheRoutes = require('./routes/cacheRoutes');
 
 const app = express();
 
+app.use((req, res, next) => {
+  console.log('Incoming request:', req.method, req.url);
+  console.log('Headers:', req.headers);
+  next();
+});
+
 // Configure CORS
 app.use(cors({
   origin: '*',

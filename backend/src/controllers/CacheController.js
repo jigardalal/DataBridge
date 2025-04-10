@@ -26,6 +26,9 @@ class CacheController {
    */
   async clearCache(req, res) {
     try {
+      if (req.user?.role !== 'admin') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
       await this.cacheManager.clear();
       res.json({ message: 'Cache cleared successfully' });
     } catch (error) {
@@ -40,6 +43,9 @@ class CacheController {
    */
   async deleteCacheEntry(req, res) {
     try {
+      if (req.user?.role !== 'admin') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
       const { key } = req.params;
       await this.cacheManager.delete(key);
       res.json({ message: 'Cache entry deleted successfully' });
@@ -59,6 +65,46 @@ class CacheController {
       res.json({ healthy: isHealthy });
     } catch (error) {
       res.status(500).json({ error: 'Failed to check cache health' });
+    }
+  }
+
+  /**
+   * Set a cache entry
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+  async setCacheEntry(req, res) {
+    try {
+      const { key, value, ttl } = req.body;
+      
+      if (!key || value === undefined) {
+        return res.status(400).json({ error: 'Key and value are required' });
+      }
+
+      await this.cacheManager.set(key, value, ttl);
+      res.json({ message: 'Cache entry set successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to set cache entry' });
+    }
+  }
+
+  /**
+   * Get a cache entry
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+  async getCacheEntry(req, res) {
+    try {
+      const { key } = req.params;
+      
+      if (!key) {
+        return res.status(400).json({ error: 'Cache key is required' });
+      }
+
+      const value = await this.cacheManager.get(key);
+      res.json({ value });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get cache entry' });
     }
   }
 }

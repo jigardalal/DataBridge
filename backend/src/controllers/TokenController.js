@@ -27,7 +27,7 @@ class TokenController {
   async checkLimits(req, res) {
     try {
       const { estimatedTokens } = req.body;
-      if (!estimatedTokens || typeof estimatedTokens !== 'number') {
+      if (!estimatedTokens || typeof estimatedTokens !== 'number' || estimatedTokens < 0) {
         return res.status(400).json({ error: 'Invalid estimatedTokens value' });
       }
 
@@ -39,12 +39,35 @@ class TokenController {
   }
 
   /**
+   * Record token usage for a request
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+  async recordUsage(req, res) {
+    try {
+      const { tokens, endpoint, model } = req.body;
+      
+      if (!tokens || typeof tokens !== 'number' || tokens < 0) {
+        return res.status(400).json({ error: 'Invalid tokens value' });
+      }
+
+      await this.tokenManager.recordUsage(tokens, endpoint, model);
+      res.json({ message: 'Token usage recorded successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to record token usage' });
+    }
+  }
+
+  /**
    * Reset daily token usage (admin only)
    * @param {Object} req - Express request object
    * @param {Object} res - Express response object
    */
   async resetDailyUsage(req, res) {
     try {
+      if (req.user?.role !== 'admin') {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
       await this.tokenManager.resetDailyUsage();
       res.json({ message: 'Daily token usage reset successfully' });
     } catch (error) {

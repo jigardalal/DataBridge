@@ -7,25 +7,45 @@ const fileDataSchema = new mongoose.Schema({
   },
   fileType: {
     type: String,
-    enum: ['xlsx', 'xls', 'csv'],
-    required: true
-  },
-  uploadDate: {
-    type: Date,
-    default: Date.now
+    required: true,
+    enum: ['xlsx', 'xls', 'csv']
   },
   data: {
-    type: [mongoose.Schema.Types.Mixed],
+    type: Array,
+    required: true
+  },
+  columnHeaders: {
+    type: Array,
     required: true
   },
   rowCount: {
     type: Number,
     required: true
   },
-  columnHeaders: {
-    type: [String],
+  totalRowsBeforeFiltering: {
+    type: Number,
     required: true
+  },
+  blankRowsRemoved: {
+    type: Number,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
   }
-}, { timestamps: true });
+});
 
-module.exports = mongoose.model('FileData', fileDataSchema); 
+// Update the updatedAt timestamp before saving
+fileDataSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+const FileData = mongoose.model('FileData', fileDataSchema);
+
+module.exports = { FileData }; 
