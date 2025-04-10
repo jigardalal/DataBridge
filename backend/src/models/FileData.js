@@ -46,6 +46,7 @@ fileDataSchema.pre('save', function(next) {
   next();
 });
 
-const FileData = mongoose.model('FileData', fileDataSchema);
+// Check if the model is already registered to prevent duplicate model errors
+const FileData = mongoose.models.FileData || mongoose.model('FileData', fileDataSchema);
 
-module.exports = { FileData }; 
+module.exports = FileData; 

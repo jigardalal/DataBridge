@@ -92,14 +92,16 @@ export const FileUpload: React.FC = () => {
         console.log('FormData entry:', pair[0], pair[1]);
       }
 
-      await uploadDataset(formData);
+      const response = await uploadDataset(formData);
       
       setFiles(prev => prev.map(f => 
         f === file ? { ...f, status: 'success', progress: 100 } : f
       ));
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      const errorMessage = error.response?.data?.error || 'Upload failed. Please try again.';
       setFiles(prev => prev.map(f => 
-        f === file ? { ...f, status: 'error', error: 'Upload failed' } : f
+        f === file ? { ...f, status: 'error', error: errorMessage } : f
       ));
     }
   };

@@ -51,11 +51,6 @@ const parseFile = async (req, res) => {
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     console.log(`Converted to JSON. Total rows before filtering: ${jsonData.length}`);
 
-    // Debug: print each row and emptiness status
-    jsonData.forEach((row, idx) => {
-      console.log(`Row ${idx}:`, row, 'Is empty:', isRowEmpty(row));
-    });
-
     // Filter out empty rows
     const filteredData = jsonData.filter(row => !isRowEmpty(row));
     console.log(`Rows after filtering empty rows: ${filteredData.length}`);
@@ -69,6 +64,12 @@ const parseFile = async (req, res) => {
     // Extract headers and data
     const [headers, ...data] = filteredData;
     console.log('Headers:', headers);
+
+    // Validate headers
+    if (!headers || headers.length === 0) {
+      console.log('No headers found in file');
+      return res.status(400).json({ error: 'File must contain column headers' });
+    }
 
     // Filter out any remaining rows that might be empty after header extraction
     const validData = data.filter(row => !isRowEmpty(row));
@@ -89,25 +90,32 @@ const parseFile = async (req, res) => {
         return rowData;
       }),
       rowCount: validData.length,
-      columnHeaders: headers
+      columnHeaders: headers,
+      totalRowsBeforeFiltering: jsonData.length,
+      blankRowsRemoved: jsonData.length - filteredData.length
     });
 
     // Save to database
-    await fileData.save();
-    console.log('Data saved to database. FileId:', fileData._id);
+    try {
+      await fileData.save();
+      console.log('Data saved to database. FileId:', fileData._id);
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      return res.status(500).json({ error: 'Error saving file data to database' });
+    }
 
     res.status(200).json({
       message: 'File uploaded and processed successfully',
       fileId: fileData._id,
       rowCount: fileData.rowCount,
       headers: fileData.columnHeaders,
-      totalRowsBeforeFiltering: jsonData.length,
-      blankRowsRemoved: jsonData.length - filteredData.length
+      totalRowsBeforeFiltering: fileData.totalRowsBeforeFiltering,
+      blankRowsRemoved: fileData.blankRowsRemoved
     });
 
   } catch (error) {
     console.error('File parsing error:', error);
-    res.status(500).json({ error: 'Error processing file' });
+    res.status(500).json({ error: 'Error processing file: ' + error.message });
   }
 };
 

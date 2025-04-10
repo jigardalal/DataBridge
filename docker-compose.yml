@@ -3,6 +3,7 @@ version: "3.8"
 services:
   frontend:
     build: ./frontend
+    image: databridge-frontend:latest
     ports:
       - "3001:80"
     environment:
@@ -12,6 +13,7 @@ services:
 
   backend:
     build: ./backend
+    image: databridge-backend:latest
     ports:
       - "3002:3002"
     environment:
