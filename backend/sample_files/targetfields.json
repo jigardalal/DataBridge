@@ -1,0 +1,2753 @@
+[
+  {
+    "dataCategory": "Charge Profile",
+    "fields": [
+      {
+        "name": "Charge Profile Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Description",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Unit Of Measure",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Effective Date Based On",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Auto Add",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate From This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate To This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate In This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate For Exact Events",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (any In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (not In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (not In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "City State Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Minimum Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Free Units",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Start Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Row (leave Blank)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "trucks",
+    "fields": [
+      {
+        "name": "Equipment Id",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License State",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Plate #",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Year",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Make",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Model",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Aid",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Itd",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Vin",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Registration Expiration",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Inspection Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Hut Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Annual Inspection",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Bobtail Insurance",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Diesel Emission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Truck Owner",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "customers",
+    "fields": [
+      {
+        "name": "Company Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Address",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "City",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "State",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Country",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Main Contact Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Secondary Contact Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Secondary Phone",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Mobile",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Billing Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Password",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Credit Limit",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Organization Type",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Receiver Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Mc Number",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Fleet Customer",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Pay Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Order_List",
+    "fields": [
+      {
+        "name": "Order Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Order Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Total Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Status",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Payment Method",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Delivery Address",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Driver Charge Profile",
+    "fields": [
+      {
+        "name": "Charge Profile Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Description",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Unit Of Measure",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Effective Date Based On",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Auto Add",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate From This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate To This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "If Event",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Event Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "If Event 1",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Event Time 1",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Event Location 1",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (any In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (not In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (not In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Minimum Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Free Units",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "From Legs",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "From Leg Event Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "To Legs",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "To Leg Event Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Start Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Driver Group",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Row (leave Blank)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Chassis",
+    "fields": [
+      {
+        "name": "Chassis #",
+        "type": "boolean",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Chassis Type",
+        "type": "boolean",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Chassis Size",
+        "type": "boolean",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Chassis Owner",
+        "type": "boolean",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Year",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Make",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Model",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Annual Inspection Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Itd",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License State",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Number",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Vin",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Registration",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Inspection",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Insurance",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Carrier Tariff",
+    "fields": [
+      {
+        "name": "Tariff Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tarrif Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tarff Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Terminal",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Pick Up Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Delivery Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Return Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Carrier Pay Group",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Profile Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Description",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Unit Of Measure",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Percentage Based On",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Effective Date Based On",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Auto Add",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate From This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate To This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate In This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate For Exact Events",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (any In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (not In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (not In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Minimum Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Free Units",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Start Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Row (leave Blank)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Vehicle_List",
+    "fields": [
+      {
+        "name": "Vehicle Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Make",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Model",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Year",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Status",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Plate",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Last Service Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Users",
+    "fields": [
+      {
+        "name": "First Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Last Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Phone",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Email",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Password",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "System Roles",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Custom Role",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "customerEmployee",
+    "fields": [
+      {
+        "name": "Email",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "First Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Last Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Mobile",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer Id",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Password",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Loads Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Dropped Containers Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Account Payable Permission",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Info Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Billing Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Documents Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Upload Documents Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Payments Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tracking Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Service Messaging Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Summary Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Shipment Tracking Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer Permission",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Driver_List",
+    "fields": [
+      {
+        "name": "Driver Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Driver Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Number",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Vehicle Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Status",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Phone",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Join Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "drivers",
+    "fields": [
+      {
+        "name": "First Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Last Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Phone",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Password",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Username",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Truck Number",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Country Code",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License State",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Number",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Sealink #",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Emergency Contact Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Emergency Relation",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Emergency Contact Number",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Billing Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Profile Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Expiration Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Date Of Birth",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Date Of Hire",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Medical Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Twic Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Sea Link Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Home Branch Time Zone",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Trailers",
+    "fields": [
+      {
+        "name": "Trailer #",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Year",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Make",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Model",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Aid",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Itd",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Vin",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Registration Expiration",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Inspection Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Plate State",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "License Plate #",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Hut Expiration",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Trailer Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Trailer Size",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Product_List",
+    "fields": [
+      {
+        "name": "Product Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Product Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Category",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Price",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Stock",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Status",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Last Restock Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Fleet Owner",
+    "fields": [
+      {
+        "name": "Company Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Address",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Dot #",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Mc #",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Main Contact Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Secondary Contact Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Mobile",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tax Id/ein #",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Ssn",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Carrier",
+    "fields": [
+      {
+        "name": "Company Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Contact Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Address",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Country",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "State",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "City",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Login Email Address",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tender Email Address 1",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tender Email Address 2",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tender Email Address 3",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Phone Number",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Scac",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Mc#",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Usdot Number",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "External Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 1",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 2",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 3",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 4",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 5",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 6",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 7",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 8",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 9",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 10",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 11",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 12",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 13",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 14",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Branch 15",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Customer_List",
+    "fields": [
+      {
+        "name": "Customer Id",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Email",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Phone",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Address",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Status",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Join Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Carrier Charge Profile",
+    "fields": [
+      {
+        "name": "Carrier Pay Group",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Profile Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Description",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Unit Of Measure",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Effective Date Based On",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Auto Add",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate From This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate To This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate In This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate For Exact Events",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (any In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (not In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (not In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Minimum Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Free Units",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Start Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Row (leave Blank)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "chassisOwner",
+    "fields": [
+      {
+        "name": "Company Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Contact Name",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Phone",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Address",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "City",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "State",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Load Tariff",
+    "fields": [
+      {
+        "name": "Tariff Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tarrif Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tarff Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Terminal",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Pick Up Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Delivery Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Return Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Profile Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Description",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Unit Of Measure",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Percentage Based On",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Effective Date Based On",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Auto Add",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate From This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate To This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate In This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate For Exact Events",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (any In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (not In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (not In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Minimum Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Free Units",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Start Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Row (leave Blank)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  },
+  {
+    "dataCategory": "Driver Tariff",
+    "fields": [
+      {
+        "name": "Tariff Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tarrif Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Tarff Effective End Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Terminal",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Customer",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Pick Up Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Delivery Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Return Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Profile Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Name",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Description",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Unit Of Measure",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Effective Date Based On",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Charge Effective Start Date",
+        "type": "date",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Auto Add",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate From This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate To This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate In This Event",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Calculate For Exact Events",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (any In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Zip Code Rule (not In)",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (any In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Load Type Rule (not In)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Minimum Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Free Units",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Amount",
+        "type": "number",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "From Legs",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "From Leg Event Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "To Legs",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "To Leg Event Location",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Start Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Distance",
+        "type": "boolean",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "Driver Group",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      },
+      {
+        "name": "End Row (leave Blank)",
+        "type": "string",
+        "required": false,
+        "description": "",
+        "validation": null
+      }
+    ]
+  }
+]

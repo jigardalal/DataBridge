@@ -1,5 +1,6 @@
 const MappingDictionary = require('../models/MappingDictionary');
-const MappingOptions = require('../models/MappingOptions');
+const TargetField = require('../models/TargetField');
+const MappingAgent = require('../agents/MappingAgent');
 
 module.exports = {
   // GET /api/mappings/:dataCategory
@@ -7,9 +8,6 @@ module.exports = {
     const { dataCategory } = req.params;
     const { fileId } = req.query;
     try {
-      const MappingAgent = require('../agents/MappingAgent');
-      const agent = new MappingAgent();
-
       // Normalize dataCategory by replacing underscores with spaces
       const normalizedCategory = dataCategory.replace(/_/g, ' ');
 
@@ -25,58 +23,56 @@ module.exports = {
         }
       }
 
-      if (inputFields.length === 0) {
-        inputFields = [
-          'Customer ID',
-          'Customer Name',
-          'Email Address',
-          'Phone Number',
-          'Street Address',
-          'Customer Status',
-          'Registration Date'
-        ];
-      }
-
-      const mappingResult = await agent.mapFields(inputFields, normalizedCategory);
-      const optionsDoc = await MappingOptions.findOne({ dataCategory: normalizedCategory });
-      const dropdownOptions = optionsDoc ? optionsDoc.fields : [];
-
-      const schemaKeyToLabel = {
-        id: 'Customer ID',
-        name: 'Customer Name',
-        email: 'Email Address',
-        phone: 'Phone Number',
-        address: 'Street Address',
-        status: 'Customer Status',
-        join_date: 'Registration Date'
-      };
-
-      const mappings = (mappingResult.mappings || []).map(m => ({
-        input_field: m.input_field,
-        output_field: schemaKeyToLabel[m.output_field] || '',
-        confidence: m.confidence
-      }));
+      // Get target fields from TargetField collection
+      const targetFieldsDoc = await TargetField.findOne({ dataCategory: normalizedCategory });
+      const targetFields = targetFieldsDoc ? targetFieldsDoc.fields.map(f => ({
+        name: f.name,
+        type: f.type,
+        required: f.required,
+        description: f.description
+      })) : [];
 
       res.json({
         inputFields,
-        dropdownOptions,
-        mappings
+        targetFields,
+        mappings: [] // Start with empty mappings, user will create them
       });
     } catch (error) {
-      console.error('Error generating mappings:', error);
-      res.status(500).json({ error: error.message });
+      console.error('Error getting mappings:', error);
+      res.status(500).json({ 
+        error: error.message,
+        details: 'Failed to get field mappings. Please check the data category and try again.'
+      });
     }
   },
 
   // PATCH /api/mappings/:dataCategory
   async updateMappings(req, res) {
     const { dataCategory } = req.params;
-    const { updatedMappings } = req.body;
-    res.json({
-      dataCategory,
-      updatedMappings,
-      message: 'Stub: update mappings with user adjustments'
-    });
+    const { mappings, templateName } = req.body;
+    
+    try {
+      // Save the mapping as a template if a name is provided
+      if (templateName) {
+        const template = new MappingDictionary({
+          name: templateName,
+          mappings: mappings.map(m => ({
+            inputField: m.input_field,
+            outputField: m.output_field,
+            confidenceScore: m.confidence || 1.0
+          }))
+        });
+        await template.save();
+      }
+
+      res.json({
+        success: true,
+        message: templateName ? 'Mapping template saved successfully' : 'Mappings updated successfully'
+      });
+    } catch (error) {
+      console.error('Error saving mappings:', error);
+      res.status(500).json({ error: error.message });
+    }
   },
 
   // POST /api/mapping-templates
@@ -117,7 +113,7 @@ module.exports = {
   // GET /api/data-categories
   async listDataCategories(req, res) {
     try {
-      const dataCategories = await MappingOptions.distinct('dataCategory');
+      const dataCategories = await TargetField.distinct('dataCategory');
       res.json(dataCategories);
     } catch (error) {
       console.error('Error fetching data categories:', error);

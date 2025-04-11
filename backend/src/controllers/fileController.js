@@ -117,7 +117,11 @@ const getFileData = async (req, res) => {
 
 const listFiles = async (req, res) => {
   try {
-    const files = await FileData.find({}, '_id fileName createdAt updatedAt rowCount');
+    const filter = {};
+    if (req.query.dataCategory) {
+      filter.dataCategory = req.query.dataCategory;
+    }
+    const files = await FileData.find(filter, '_id fileName createdAt updatedAt rowCount dataCategory');
     res.json(files);
   } catch (error) {
     console.error('Error listing files:', error);

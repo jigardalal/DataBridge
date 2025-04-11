@@ -26,32 +26,210 @@ class MappingAgent extends BaseAgent {
 
     // Initialize mapping dictionary with common variations
     this.mappingDictionary = {
-      customer: {
-        id: ['Customer ID', 'CustomerID', 'Client ID', 'CustID', 'Customer Number'],
-        name: ['Customer Name', 'Client Name', 'Full Name', 'Name'],
-        email: ['Email', 'Email Address', 'Contact Email', 'E-mail'],
-        phone: ['Phone', 'Phone Number', 'Contact Number', 'Telephone'],
-        address: ['Address', 'Street Address', 'Mailing Address', 'Location'],
-        status: ['Status', 'Customer Status', 'Client Status', 'State'],
-        join_date: ['Join Date', 'Registration Date', 'Start Date', 'Member Since']
+      carrier: {
+        id: ['Carrier ID', 'CarrierID', 'ID', 'Carrier Number'],
+        name: ['Carrier Name', 'Name', 'Company Name'],
+        status: ['Status', 'Carrier Status', 'Active Status'],
+        contact_name: ['Contact Name', 'Primary Contact', 'Contact Person'],
+        contact_email: ['Contact Email', 'Email', 'Email Address'],
+        contact_phone: ['Contact Phone', 'Phone', 'Phone Number'],
+        address: ['Address', 'Street Address', 'Mailing Address'],
+        mc_number: ['MC Number', 'Motor Carrier Number', 'MC#'],
+        dot_number: ['DOT Number', 'DOT#', 'Department of Transportation Number']
       },
-      driver: {
-        id: ['Driver ID', 'DriverID', 'Driver Number', 'ID'],
-        name: ['Driver Name', 'Name', 'Full Name'],
-        license: ['License Number', 'Driver License', 'License ID', 'DL Number'],
-        vehicle_type: ['Vehicle Type', 'Vehicle Category', 'Car Type'],
-        status: ['Status', 'Driver Status', 'Active Status'],
-        phone: ['Phone', 'Contact Number', 'Mobile Number'],
-        join_date: ['Join Date', 'Start Date', 'Registration Date']
+      carrier_charge_profile: {
+        id: ['Profile ID', 'ID', 'Charge Profile ID'],
+        name: ['Profile Name', 'Name', 'Charge Profile Name'],
+        carrier_id: ['Carrier ID', 'Carrier', 'Carrier Reference'],
+        rate_type: ['Rate Type', 'Type', 'Pricing Type'],
+        base_rate: ['Base Rate', 'Rate', 'Standard Rate'],
+        minimum_charge: ['Minimum Charge', 'Min Charge', 'Base Charge'],
+        maximum_charge: ['Maximum Charge', 'Max Charge', 'Cap'],
+        effective_date: ['Effective Date', 'Start Date', 'Valid From'],
+        expiration_date: ['Expiration Date', 'End Date', 'Valid Until']
       },
-      vehicle: {
-        id: ['Vehicle ID', 'VehicleID', 'Car ID', 'Fleet Number'],
+      carrier_tariff: {
+        id: ['Tariff ID', 'ID', 'Tariff Number'],
+        name: ['Tariff Name', 'Name', 'Description'],
+        carrier_id: ['Carrier ID', 'Carrier', 'Carrier Reference'],
+        rate_type: ['Rate Type', 'Type', 'Pricing Type'],
+        origin: ['Origin', 'From', 'Starting Point'],
+        destination: ['Destination', 'To', 'End Point'],
+        rate: ['Rate', 'Price', 'Cost'],
+        effective_date: ['Effective Date', 'Start Date', 'Valid From'],
+        expiration_date: ['Expiration Date', 'End Date', 'Valid Until']
+      },
+      charge_profile: {
+        id: ['Profile ID', 'ID', 'Charge Profile ID'],
+        name: ['Profile Name', 'Name', 'Charge Profile Name'],
+        type: ['Type', 'Profile Type', 'Category'],
+        base_rate: ['Base Rate', 'Rate', 'Standard Rate'],
+        minimum_charge: ['Minimum Charge', 'Min Charge', 'Base Charge'],
+        maximum_charge: ['Maximum Charge', 'Max Charge', 'Cap'],
+        effective_date: ['Effective Date', 'Start Date', 'Valid From'],
+        expiration_date: ['Expiration Date', 'End Date', 'Valid Until']
+      },
+      chassis: {
+        id: ['Chassis ID', 'ID', 'Chassis Number'],
+        owner_id: ['Owner ID', 'Owner', 'Owner Reference'],
+        status: ['Status', 'Chassis Status', 'Condition'],
         make: ['Make', 'Manufacturer', 'Brand'],
-        model: ['Model', 'Vehicle Model', 'Car Model'],
+        model: ['Model', 'Model Number', 'Type'],
+        year: ['Year', 'Model Year', 'Manufacturing Year'],
+        last_inspection: ['Last Inspection', 'Inspection Date', 'Last Check'],
+        next_inspection: ['Next Inspection', 'Due Date', 'Inspection Due']
+      },
+      chassis_owner: {
+        id: ['Owner ID', 'ID', 'Owner Number'],
+        name: ['Owner Name', 'Name', 'Company Name'],
+        status: ['Status', 'Owner Status', 'Active Status'],
+        contact_name: ['Contact Name', 'Primary Contact', 'Contact Person'],
+        contact_email: ['Contact Email', 'Email', 'Email Address'],
+        contact_phone: ['Contact Phone', 'Phone', 'Phone Number'],
+        address: ['Address', 'Street Address', 'Mailing Address']
+      },
+      customer_employee: {
+        id: ['Employee ID', 'ID', 'Employee Number'],
+        customer_id: ['Customer ID', 'Customer', 'Customer Reference'],
+        name: ['Name', 'Full Name', 'Employee Name'],
+        email: ['Email', 'Email Address', 'Contact Email'],
+        phone: ['Phone', 'Phone Number', 'Contact Number'],
+        role: ['Role', 'Position', 'Job Title'],
+        status: ['Status', 'Employee Status', 'Active Status']
+      },
+      customer_list: {
+        id: ['Customer ID', 'ID', 'Customer Number'],
+        name: ['Customer Name', 'Name', 'Company Name'],
+        status: ['Status', 'Customer Status', 'Active Status'],
+        type: ['Type', 'Customer Type', 'Category'],
+        contact_name: ['Contact Name', 'Primary Contact', 'Contact Person'],
+        contact_email: ['Contact Email', 'Email', 'Email Address'],
+        contact_phone: ['Contact Phone', 'Phone', 'Phone Number'],
+        address: ['Address', 'Street Address', 'Mailing Address']
+      },
+      customers: {
+        id: ['Customer ID', 'ID', 'Customer Number'],
+        name: ['Customer Name', 'Name', 'Company Name'],
+        status: ['Status', 'Customer Status', 'Active Status'],
+        type: ['Type', 'Customer Type', 'Category'],
+        contact_name: ['Contact Name', 'Primary Contact', 'Contact Person'],
+        contact_email: ['Contact Email', 'Email', 'Email Address'],
+        contact_phone: ['Contact Phone', 'Phone', 'Phone Number'],
+        address: ['Address', 'Street Address', 'Mailing Address']
+      },
+      driver_charge_profile: {
+        id: ['Profile ID', 'ID', 'Charge Profile ID'],
+        name: ['Profile Name', 'Name', 'Charge Profile Name'],
+        driver_id: ['Driver ID', 'Driver', 'Driver Reference'],
+        rate_type: ['Rate Type', 'Type', 'Pricing Type'],
+        base_rate: ['Base Rate', 'Rate', 'Standard Rate'],
+        minimum_charge: ['Minimum Charge', 'Min Charge', 'Base Charge'],
+        maximum_charge: ['Maximum Charge', 'Max Charge', 'Cap'],
+        effective_date: ['Effective Date', 'Start Date', 'Valid From'],
+        expiration_date: ['Expiration Date', 'End Date', 'Valid Until']
+      },
+      driver_list: {
+        id: ['Driver ID', 'ID', 'Driver Number'],
+        name: ['Driver Name', 'Name', 'Full Name'],
+        status: ['Status', 'Driver Status', 'Active Status'],
+        license: ['License Number', 'Driver License', 'License ID'],
+        vehicle_type: ['Vehicle Type', 'Vehicle Category', 'Car Type'],
+        phone: ['Phone', 'Contact Number', 'Mobile Number'],
+        email: ['Email', 'Email Address', 'Contact Email']
+      },
+      driver_tariff: {
+        id: ['Tariff ID', 'ID', 'Tariff Number'],
+        name: ['Tariff Name', 'Name', 'Description'],
+        driver_id: ['Driver ID', 'Driver', 'Driver Reference'],
+        rate_type: ['Rate Type', 'Type', 'Pricing Type'],
+        origin: ['Origin', 'From', 'Starting Point'],
+        destination: ['Destination', 'To', 'End Point'],
+        rate: ['Rate', 'Price', 'Cost'],
+        effective_date: ['Effective Date', 'Start Date', 'Valid From'],
+        expiration_date: ['Expiration Date', 'End Date', 'Valid Until']
+      },
+      drivers: {
+        id: ['Driver ID', 'ID', 'Driver Number'],
+        name: ['Driver Name', 'Name', 'Full Name'],
+        status: ['Status', 'Driver Status', 'Active Status'],
+        license: ['License Number', 'Driver License', 'License ID'],
+        vehicle_type: ['Vehicle Type', 'Vehicle Category', 'Car Type'],
+        phone: ['Phone', 'Contact Number', 'Mobile Number'],
+        email: ['Email', 'Email Address', 'Contact Email']
+      },
+      fleet_owner: {
+        id: ['Owner ID', 'ID', 'Owner Number'],
+        name: ['Owner Name', 'Name', 'Company Name'],
+        status: ['Status', 'Owner Status', 'Active Status'],
+        contact_name: ['Contact Name', 'Primary Contact', 'Contact Person'],
+        contact_email: ['Contact Email', 'Email', 'Email Address'],
+        contact_phone: ['Contact Phone', 'Phone', 'Phone Number'],
+        address: ['Address', 'Street Address', 'Mailing Address']
+      },
+      load_tariff: {
+        id: ['Tariff ID', 'ID', 'Tariff Number'],
+        name: ['Tariff Name', 'Name', 'Description'],
+        type: ['Type', 'Tariff Type', 'Category'],
+        origin: ['Origin', 'From', 'Starting Point'],
+        destination: ['Destination', 'To', 'End Point'],
+        rate: ['Rate', 'Price', 'Cost'],
+        effective_date: ['Effective Date', 'Start Date', 'Valid From'],
+        expiration_date: ['Expiration Date', 'End Date', 'Valid Until']
+      },
+      order_list: {
+        id: ['Order ID', 'ID', 'Order Number'],
+        customer_id: ['Customer ID', 'Customer', 'Customer Reference'],
+        status: ['Status', 'Order Status', 'State'],
+        type: ['Type', 'Order Type', 'Category'],
+        pickup_location: ['Pickup Location', 'Origin', 'From'],
+        delivery_location: ['Delivery Location', 'Destination', 'To'],
+        created_date: ['Created Date', 'Order Date', 'Date Created'],
+        scheduled_date: ['Scheduled Date', 'Due Date', 'Scheduled For']
+      },
+      product_list: {
+        id: ['Product ID', 'ID', 'Product Number'],
+        name: ['Product Name', 'Name', 'Description'],
+        type: ['Type', 'Product Type', 'Category'],
+        status: ['Status', 'Product Status', 'Active Status'],
+        unit: ['Unit', 'Unit of Measure', 'UOM'],
+        price: ['Price', 'Cost', 'Unit Price']
+      },
+      trailers: {
+        id: ['Trailer ID', 'ID', 'Trailer Number'],
+        owner_id: ['Owner ID', 'Owner', 'Owner Reference'],
+        status: ['Status', 'Trailer Status', 'Condition'],
+        make: ['Make', 'Manufacturer', 'Brand'],
+        model: ['Model', 'Model Number', 'Type'],
+        year: ['Year', 'Model Year', 'Manufacturing Year'],
+        last_inspection: ['Last Inspection', 'Inspection Date', 'Last Check'],
+        next_inspection: ['Next Inspection', 'Due Date', 'Inspection Due']
+      },
+      trucks: {
+        id: ['Truck ID', 'ID', 'Truck Number'],
+        owner_id: ['Owner ID', 'Owner', 'Owner Reference'],
+        status: ['Status', 'Truck Status', 'Condition'],
+        make: ['Make', 'Manufacturer', 'Brand'],
+        model: ['Model', 'Model Number', 'Type'],
+        year: ['Year', 'Model Year', 'Manufacturing Year'],
+        last_inspection: ['Last Inspection', 'Inspection Date', 'Last Check'],
+        next_inspection: ['Next Inspection', 'Due Date', 'Inspection Due']
+      },
+      users: {
+        id: ['User ID', 'ID', 'User Number'],
+        name: ['Name', 'Full Name', 'User Name'],
+        email: ['Email', 'Email Address', 'Contact Email'],
+        role: ['Role', 'User Role', 'Position'],
+        status: ['Status', 'User Status', 'Active Status'],
+        created_date: ['Created Date', 'Join Date', 'Date Created']
+      },
+      vehicle_list: {
+        id: ['Vehicle ID', 'ID', 'Vehicle Number'],
+        type: ['Type', 'Vehicle Type', 'Category'],
+        make: ['Make', 'Manufacturer', 'Brand'],
+        model: ['Model', 'Model Number', 'Type'],
         year: ['Year', 'Model Year', 'Manufacturing Year'],
         status: ['Status', 'Vehicle Status', 'Condition'],
-        license_plate: ['License Plate', 'Plate Number', 'Registration Number'],
-        last_service: ['Last Service Date', 'Service Date', 'Maintenance Date']
+        owner_id: ['Owner ID', 'Owner', 'Owner Reference']
       }
     };
 
@@ -112,8 +290,17 @@ class MappingAgent extends BaseAgent {
       throw new Error('No input fields provided');
     }
 
-    if (!this.mappingDictionary[targetSchema]) {
-      throw new Error(`Unknown schema type: ${targetSchema}`);
+    // Convert targetSchema to lowercase and replace spaces with underscores for consistency
+    const normalizedSchema = targetSchema.toLowerCase().replace(/\s+/g, '_');
+
+    // If we don't have a predefined dictionary for this schema, create a basic one
+    if (!this.mappingDictionary[normalizedSchema]) {
+      this.mappingDictionary[normalizedSchema] = {};
+      // Create basic field mappings based on common patterns
+      inputFields.forEach(field => {
+        const normalizedField = field.toLowerCase().replace(/\s+/g, '_');
+        this.mappingDictionary[normalizedSchema][normalizedField] = [field];
+      });
     }
 
     // FAST MODE: skip LLM call, use dictionary heuristic
@@ -123,7 +310,10 @@ class MappingAgent extends BaseAgent {
 
       inputFields.forEach(input => {
         let matched = false;
-        for (const [key, variations] of Object.entries(this.mappingDictionary[targetSchema])) {
+        const normalizedInput = input.toLowerCase().replace(/\s+/g, '_');
+        
+        // First try exact match
+        for (const [key, variations] of Object.entries(this.mappingDictionary[normalizedSchema])) {
           if (variations.map(v => v.toLowerCase()).includes(input.toLowerCase())) {
             mappings.push({
               input_field: input,
@@ -134,8 +324,42 @@ class MappingAgent extends BaseAgent {
             break;
           }
         }
+
+        // If no exact match, try partial match
         if (!matched) {
-          unmapped_fields.push(input);
+          for (const [key, variations] of Object.entries(this.mappingDictionary[normalizedSchema])) {
+            const normalizedKey = key.toLowerCase();
+            const normalizedVariations = variations.map(v => v.toLowerCase());
+            
+            // Check if input contains any variation or vice versa
+            const hasMatch = normalizedVariations.some(v => 
+              normalizedInput.includes(v) || v.includes(normalizedInput)
+            );
+            
+            if (hasMatch) {
+              mappings.push({
+                input_field: input,
+                output_field: key,
+                confidence: 0.7 // Lower confidence for partial matches
+              });
+              matched = true;
+              break;
+            }
+          }
+        }
+
+        // If still no match, try to create a new mapping
+        if (!matched) {
+          const normalizedField = normalizedInput.replace(/[^a-z0-9_]/g, '');
+          if (normalizedField) {
+            mappings.push({
+              input_field: input,
+              output_field: normalizedField,
+              confidence: 0.5 // Lowest confidence for new fields
+            });
+          } else {
+            unmapped_fields.push(input);
+          }
         }
       });
 
@@ -152,7 +376,7 @@ class MappingAgent extends BaseAgent {
     }
 
     this.usageStats.total_calls++;
-    const cacheKey = this._generateMappingCacheKey(inputFields, targetSchema);
+    const cacheKey = this._generateMappingCacheKey(inputFields, normalizedSchema);
     const cachedResult = this.getCachedResponse(cacheKey);
     
     if (cachedResult) {
@@ -178,8 +402,8 @@ class MappingAgent extends BaseAgent {
 }\n` +
         JSON.stringify({
           input_fields: inputFields,
-          target_schema: targetSchema,
-          mapping_dictionary: this.mappingDictionary[targetSchema],
+          target_schema: normalizedSchema,
+          mapping_dictionary: this.mappingDictionary[normalizedSchema],
           options
         })
     };
@@ -211,7 +435,7 @@ class MappingAgent extends BaseAgent {
         }
       };
 
-      this._updateUsageStats(targetSchema, mappingResult.mappings);
+      this._updateUsageStats(normalizedSchema, mappingResult.mappings);
       this.cacheResponse(cacheKey, mappingResult);
 
       return mappingResult;
