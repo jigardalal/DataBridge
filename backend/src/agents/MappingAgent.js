@@ -1,4 +1,5 @@
 const BaseAgent = require('./BaseAgent');
+const MappingCache = require('../models/MappingCache');
 
 /**
  * @typedef {Object} FieldMapping
@@ -293,9 +294,28 @@ class MappingAgent extends BaseAgent {
       throw new Error('No target fields provided');
     }
 
-    const systemMessage = {
-      role: 'system',
-      content: `You are an expert at matching field names between different data schemas. 
+    try {
+      // Check cache first
+      const cacheKey = {
+        dataCategory: targetFields[0]?.dataCategory || 'unknown',
+        inputFields: [...inputFields].sort() // Sort to ensure consistent cache key
+      };
+
+      const cachedResult = await MappingCache.findOne(cacheKey);
+      if (cachedResult) {
+        console.log('Using cached mappings');
+        return {
+          mappings: cachedResult.mappings,
+          unmapped_fields: [],
+          overall_confidence: this.calculateOverallConfidence(cachedResult.mappings)
+        };
+      }
+
+      // If not in cache, generate new mappings using LLM
+      console.log('Generating new mappings with LLM');
+      const systemMessage = {
+        role: 'system',
+        content: `You are an expert at matching field names between different data schemas. 
 Your task is to match input field names to the most appropriate target field names.
 For each input field, provide:
 1. The best matching target field
@@ -307,11 +327,11 @@ Consider:
 - Common abbreviations and variations
 - Field types and data patterns
 - Context from surrounding fields`
-    };
+      };
 
-    const userMessage = {
-      role: 'user',
-      content: `Match these input fields to the target fields:
+      const userMessage = {
+        role: 'user',
+        content: `Match these input fields to the target fields:
 
 Input Fields:
 ${JSON.stringify(inputFields, null, 2)}
@@ -332,17 +352,25 @@ Provide your response in JSON format with:
   "unmapped_fields": ["fields that couldn't be matched"],
   "overall_confidence": 0.85
 }`
-    };
+      };
 
-    try {
       const response = await this.makeAPICall([systemMessage, userMessage], {
         temperature: 0.2,
         response_format: { type: 'json_object' }
       });
 
       const result = JSON.parse(response.content);
-      
-      // Validate and format the response
+
+      // Store in cache
+      await MappingCache.create({
+        ...cacheKey,
+        mappings: result.mappings.map(m => ({
+          input_field: m.input_field,
+          output_field: m.output_field,
+          confidence: m.confidence
+        }))
+      });
+
       return {
         mappings: result.mappings.map(m => ({
           input_field: m.input_field,
@@ -355,8 +383,14 @@ Provide your response in JSON format with:
       };
     } catch (error) {
       console.error('Error in mapFields:', error);
-      throw new Error('Failed to generate field mappings');
+      throw error;
     }
+  }
+
+  calculateOverallConfidence(mappings) {
+    if (!mappings || mappings.length === 0) return 0;
+    const totalConfidence = mappings.reduce((sum, m) => sum + m.confidence, 0);
+    return totalConfidence / mappings.length;
   }
 
   /**
