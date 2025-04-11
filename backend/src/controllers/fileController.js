@@ -68,6 +68,7 @@ const parseFile = async (req, res) => {
 
     const fileData = new FileData({
       fileName: req.file.originalname,
+      dataCategory: req.body.dataCategory || 'unknown',
       fileType,
       columnHeaders: headers,
       rowCount: validRows.length,

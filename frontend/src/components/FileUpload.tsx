@@ -1,8 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import { Box, Typography, Paper, LinearProgress, IconButton, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
-import { CloudUpload, Delete, CheckCircle, Error } from '@mui/icons-material';
+import { CloudUpload, Delete, CheckCircle, Error as ErrorIcon, X as CloseIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { uploadDataset } from '../services/api';
+import axios from 'axios';
 
 const ACCEPTED_FILE_TYPES = ['.xlsx', '.xls', '.csv'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -27,6 +28,21 @@ const UploadArea = styled(Paper)(({ theme }) => ({
 export const FileUpload: React.FC = () => {
   const [files, setFiles] = useState<FileWithProgress[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [dataCategories, setDataCategories] = useState<string[]>([]);
+  const [selectedDataCategory, setSelectedDataCategory] = useState<string>('');
+  const [categoryError, setCategoryError] = useState<string>('');
+
+  React.useEffect(() => {
+    const fetchDataCategories = async () => {
+      try {
+        const response = await axios.get('/api/data-categories');
+        setDataCategories(response.data || []);
+      } catch (error) {
+        console.error('Error fetching data categories:', error);
+      }
+    };
+    fetchDataCategories();
+  }, []);
 
   const validateFile = (file: File): string | null => {
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
@@ -52,9 +68,13 @@ export const FileUpload: React.FC = () => {
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    if (!selectedDataCategory) {
+      setCategoryError('Please select a data category before uploading.');
+      return;
+    }
     const droppedFiles = Array.from(e.dataTransfer.files);
     handleFiles(droppedFiles);
-  }, []);
+  }, [selectedDataCategory]);
 
   const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -64,6 +84,11 @@ export const FileUpload: React.FC = () => {
   }, []);
 
   const handleFiles = (newFiles: File[]) => {
+    if (!selectedDataCategory) {
+      setCategoryError('Please select a data category before uploading.');
+      return;
+    }
+
     const validatedFiles = newFiles.map(file => {
       const error = validateFile(file);
       const fileWithProgress = file as FileWithProgress;
@@ -73,9 +98,8 @@ export const FileUpload: React.FC = () => {
       return fileWithProgress;
     });
 
-    setFiles(prev => [...prev, ...validatedFiles]);
+    setFiles(validatedFiles);
 
-    // Upload valid files
     validatedFiles.forEach(file => {
       if (!file.error) {
         uploadFile(file);
@@ -87,30 +111,21 @@ export const FileUpload: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      for (const pair of formData.entries()) {
-        console.log('FormData entry:', pair[0], pair[1]);
-      }
+      formData.append('dataCategory', selectedDataCategory);
 
       const data = await uploadDataset(formData);
       console.log('Upload response:', data);
 
-      // Extract fileId from response
       const fileId = data.fileId;
       if (fileId) {
         console.log('Uploaded fileId:', fileId);
-        // TODO: Pass fileId to parent or store in context/global state
       }
-      
-      setFiles(prev => prev.map(f => 
-        f === file ? { ...f, status: 'success', progress: 100 } : f
-      ));
+
+      setFiles(prev => prev.map(f => f === file ? { ...f, status: 'success', progress: 100 } : f));
     } catch (error: any) {
       console.error('Upload error:', error);
       const errorMessage = error.response?.data?.error || 'Upload failed. Please try again.';
-      setFiles(prev => prev.map(f => 
-        f === file ? { ...f, status: 'error', error: errorMessage } : f
-      ));
+      setFiles(prev => prev.map(f => f === file ? { ...f, status: 'error', error: errorMessage } : f));
     }
   };
 
@@ -120,22 +135,58 @@ export const FileUpload: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
+      {categoryError && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <svg className="fill-current w-5 h-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Error</title><path d="M18.364 17.364a9 9 0 11-12.728-12.728 9 9 0 0112.728 12.728zM9 4h2v6H9V4zm0 8h2v2H9v-2z"/></svg>
+            <span>{categoryError}</span>
+          </div>
+          <button onClick={() => setCategoryError('')} className="text-red-500 hover:text-red-700 font-bold ml-4">&times;</button>
+        </div>
+      )}
+
+      <div className="mb-4">
+        <label className="block mb-2 font-semibold">Select Data Category:</label>
+        <select
+          className="border p-2 w-full mb-4"
+          value={selectedDataCategory}
+          onChange={(e) => {
+            setSelectedDataCategory(e.target.value);
+            if (e.target.value) {
+              setCategoryError('');
+            }
+          }}
+        >
+          <option value="">-- Select a data category --</option>
+          {dataCategories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <input
         type="file"
         id="file-upload"
-        multiple
         accept={ACCEPTED_FILE_TYPES.join(',')}
-        onChange={handleFileInput}
+        onChange={(e) => {
+          if (!selectedDataCategory) {
+            setCategoryError('Please select a data category before uploading.');
+            e.target.value = '';
+            return;
+          }
+          handleFileInput(e);
+        }}
         style={{ display: 'none' }}
       />
-      
+
       <label htmlFor="file-upload">
         <UploadArea
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => document.getElementById('file-upload')?.click()}
-          sx={{ backgroundColor: isDragging ? 'action.hover' : 'background.default' }}
         >
           <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
@@ -181,7 +232,7 @@ export const FileUpload: React.FC = () => {
               {file.status === 'success' ? (
                 <CheckCircle color="success" />
               ) : file.status === 'error' ? (
-                <Error color="error" />
+                <ErrorIcon color="error" />
               ) : null}
               <IconButton
                 edge="end"

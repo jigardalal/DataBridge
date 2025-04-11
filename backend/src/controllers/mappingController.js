@@ -10,6 +10,9 @@ module.exports = {
       const MappingAgent = require('../agents/MappingAgent');
       const agent = new MappingAgent();
 
+      // Normalize dataCategory by replacing underscores with spaces
+      const normalizedCategory = dataCategory.replace(/_/g, ' ');
+
       let inputFields = [];
 
       if (fileId) {
@@ -34,8 +37,8 @@ module.exports = {
         ];
       }
 
-      const mappingResult = await agent.mapFields(inputFields, dataCategory);
-      const optionsDoc = await MappingOptions.findOne({ dataCategory });
+      const mappingResult = await agent.mapFields(inputFields, normalizedCategory);
+      const optionsDoc = await MappingOptions.findOne({ dataCategory: normalizedCategory });
       const dropdownOptions = optionsDoc ? optionsDoc.fields : [];
 
       const schemaKeyToLabel = {

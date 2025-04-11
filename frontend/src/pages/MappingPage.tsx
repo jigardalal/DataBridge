@@ -61,7 +61,8 @@ const MappingPage: React.FC = () => {
   const fetchMappings = async (fileId: string, dataCategory: string) => {
     setLoading(true);
     try {
-      const response = await axios.get(`/api/mappings/${dataCategory}?fileId=${fileId}`);
+      const safeCategory = dataCategory.replace(/\s+/g, '_');
+      const response = await axios.get(`/api/mappings/${safeCategory}?fileId=${fileId}`);
       console.log('Mapping API response:', response.data);
       setMappings(response.data.mappings || []);
       setDropdownOptions(response.data.dropdownOptions || []);
