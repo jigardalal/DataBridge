@@ -10,9 +10,9 @@ module.exports = {
   // GET /api/mappings/:dataCategory
   async getMappings(req, res) {
     const { dataCategory } = req.params;
-    const { fileId } = req.query;
+    const { fileId, allData } = req.query;
     try {
-      console.log('Getting mappings for:', { dataCategory, fileId });
+      console.log('Getting mappings for:', { dataCategory, fileId, allData });
       
       // Normalize dataCategory by replacing underscores with spaces
       const normalizedCategory = dataCategory.replace(/_/g, ' ');
@@ -30,10 +30,11 @@ module.exports = {
             inputFields = fileData.columnHeaders;
             console.log('Column headers:', inputFields);
           }
-          // Get first 10 rows of data and ensure it's properly formatted
+          // Get all rows if allData=true is specified, otherwise get first 10 rows
           if (Array.isArray(fileData.data)) {
             console.log('Total rows in file:', fileData.data.length);
-            sampleData = fileData.data.slice(0, 10).map(row => {
+            const dataToUse = allData === 'true' ? fileData.data : fileData.data.slice(0, 10);
+            sampleData = dataToUse.map(row => {
               // Ensure each row has all columns, even if some are empty
               const formattedRow = {};
               inputFields.forEach(header => {
@@ -41,8 +42,8 @@ module.exports = {
               });
               return formattedRow;
             });
-            console.log('Sample data rows:', sampleData.length);
-            console.log('First sample row:', sampleData[0]);
+            console.log('Data rows being returned:', sampleData.length);
+            console.log('First row:', sampleData[0]);
           }
         } else {
           console.warn('FileData not found for fileId:', fileId);

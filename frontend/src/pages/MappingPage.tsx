@@ -36,8 +36,8 @@ const MappingPage: React.FC = () => {
   const [dropdownOptions, setDropdownOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [sampleData, setSampleData] = useState<SampleDataRow[]>([]);
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-  const [filterText, setFilterText] = useState('');
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [previewData, setPreviewData] = useState<SampleDataRow[]>([]);
 
   useEffect(() => {
     const fetchDataCategories = async () => {
@@ -136,41 +136,81 @@ const MappingPage: React.FC = () => {
     setMappings(updated);
   };
 
-  const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
+  const handlePreviewClick = async () => {
+    setLoading(true);
+    try {
+      // Get all data from the backend for preview
+      const response = await axios.get(`/api/mappings/${selectedDataCategory.replace(/\s+/g, '_')}?fileId=${selectedFileId}&allData=true`);
+      const allData = response.data.sampleData || [];
+      
+      // Map the data to the output format
+      const mappedData = allData.map((row: Record<string, any>) => {
+        const mappedRow: SampleDataRow = {};
+        mappings.forEach(mapping => {
+          if (mapping.output_field) {
+            mappedRow[mapping.output_field] = row[mapping.input_field] ?? null;
+          }
+        });
+        return mappedRow;
+      });
+      
+      setPreviewData(mappedData);
+      setIsPreviewModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching preview data:', error);
+    } finally {
+      setLoading(false);
     }
-    setSortConfig({ key, direction });
   };
 
-  const getSortedData = () => {
-    if (!sortConfig) return sampleData;
-
-    return [...sampleData].sort((a, b) => {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
+  const handleExportClick = async () => {
+    setLoading(true);
+    try {
+      // Get all data from the backend
+      const response = await axios.get(`/api/mappings/${selectedDataCategory.replace(/\s+/g, '_')}?fileId=${selectedFileId}&allData=true`);
+      const allData = response.data.sampleData || [];
+      
+      // Map the data to the output format
+      const mappedData = allData.map((row: Record<string, any>) => {
+        const mappedRow: SampleDataRow = {};
+        mappings.forEach(mapping => {
+          if (mapping.output_field) {
+            mappedRow[mapping.output_field] = row[mapping.input_field] ?? null;
+          }
+        });
+        return mappedRow;
+      });
+      
+      if (!mappedData.length) {
+        console.error('No data to export');
+        return;
       }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
-      }
-      return 0;
-    });
-  };
 
-  const getFilteredData = () => {
-    if (!filterText) return getSortedData();
+      // Convert data to CSV
+      const headers = Object.keys(mappedData[0]);
+      const csvContent = [
+        headers.join(','),
+        ...mappedData.map((row: SampleDataRow) => 
+          headers.map(header => {
+            const value = row[header];
+            return typeof value === 'string' && value.includes(',') 
+              ? `"${value}"` 
+              : value;
+          }).join(',')
+        )
+      ].join('\n');
 
-    return getSortedData().filter(row => 
-      Object.values(row).some(value => 
-        String(value).toLowerCase().includes(filterText.toLowerCase())
-      )
-    );
-  };
-
-  const getColumnHeaders = () => {
-    if (sampleData.length === 0) return [];
-    return Object.keys(sampleData[0]);
+      // Create and trigger download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `mapped_data_${selectedDataCategory}_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+    } catch (error) {
+      console.error('Error exporting data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -305,52 +345,167 @@ const MappingPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Source Data Table */}
               {sampleData.length > 0 && (
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold mb-4">Data Preview</h2>
-                  <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          {Object.keys(sampleData[0]).map((header) => {
-                            const targetField = targetFields.find(f => f.name === header);
-                            const isRequired = targetField?.required || false;
-                            return (
+                  <h2 className="text-xl font-semibold mb-4">Input Data Preview</h2>
+                  <div className="overflow-x-auto">
+                    <div className="min-w-full inline-block align-middle">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            {Object.keys(sampleData[0]).map((header) => (
                               <th
                                 key={header}
-                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap"
                               >
-                                <div className="flex items-center">
-                                  {header}
-                                  {isRequired && (
-                                    <span className="ml-1 text-red-500">*</span>
-                                  )}
-                                </div>
+                                {header}
                               </th>
-                            );
-                          })}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {sampleData.map((row, rowIndex) => (
-                          <tr key={rowIndex} className="hover:bg-gray-50">
-                            {Object.keys(sampleData[0]).map((header) => (
-                              <td
-                                key={header}
-                                className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                              >
-                                {row[header]}
-                              </td>
                             ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {sampleData.map((row, rowIndex) => (
+                            <tr key={rowIndex} className="hover:bg-gray-50">
+                              {Object.keys(sampleData[0]).map((header) => (
+                                <td
+                                  key={header}
+                                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                                >
+                                  {row[header]}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <button
+                      onClick={handlePreviewClick}
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      Preview Mapped Data & Export
+                    </button>
                   </div>
                 </div>
               )}
             </>
           )}
+        </div>
+      )}
+
+      {/* Preview Modal */}
+      {isPreviewModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[90vh] flex flex-col">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Preview Mapped Data</h3>
+              <button
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Main content area - using a div with explicit overflow styles */}
+            <div style={{
+              flex: '1 1 auto',
+              padding: '16px',
+              overflow: 'auto' /* This is crucial - enables scrolling */
+            }}>
+              {/* Table wrapper to ensure it can be wider than container */}
+              <div style={{ 
+                minWidth: '100%',
+                width: 'max-content' /* Allows content to determine width */
+              }}>
+                <table style={{ 
+                  borderCollapse: 'collapse',
+                  width: '100%'
+                }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f9fafb' }}>
+                      {previewData.length > 0 && Object.keys(previewData[0]).map((header) => {
+                        const targetField = targetFields.find(f => f.name === header);
+                        const isRequired = targetField?.required || false;
+                        return (
+                          <th
+                            key={header}
+                            style={{ 
+                              padding: '12px 24px',
+                              textAlign: 'left',
+                              fontSize: '12px',
+                              fontWeight: 'bold',
+                              color: '#6b7280',
+                              textTransform: 'uppercase',
+                              whiteSpace: 'nowrap',
+                              minWidth: '200px',
+                              position: 'sticky',
+                              top: 0,
+                              backgroundColor: '#f9fafb',
+                              borderBottom: '1px solid #e5e7eb'
+                            }}
+                          >
+                            {header}
+                            {isRequired && (
+                              <span style={{ 
+                                marginLeft: '4px', 
+                                color: '#ef4444'
+                              }}>*</span>
+                            )}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {previewData.map((row, rowIndex) => (
+                      <tr 
+                        key={rowIndex} 
+                        style={{ 
+                          borderBottom: '1px solid #e5e7eb'
+                        }}
+                      >
+                        {Object.keys(previewData[0]).map((header) => (
+                          <td
+                            key={header}
+                            style={{ 
+                              padding: '12px 24px',
+                              whiteSpace: 'nowrap',
+                              fontSize: '14px',
+                              color: '#6b7280',
+                              minWidth: '200px'
+                            }}
+                          >
+                            {row[header]}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="p-4 border-t flex justify-end space-x-4">
+              <button
+                onClick={() => setIsPreviewModalOpen(false)}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleExportClick}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Export to CSV
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
