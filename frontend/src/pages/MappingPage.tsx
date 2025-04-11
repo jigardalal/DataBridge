@@ -15,6 +15,11 @@ interface UploadedFile {
   rowCount: number;
 }
 
+interface SampleDataRow {
+  id: number;
+  [key: string]: any;
+}
+
 const MappingPage: React.FC = () => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [dataCategories, setDataCategories] = useState<string[]>([]);
@@ -23,6 +28,7 @@ const MappingPage: React.FC = () => {
   const [mappings, setMappings] = useState<Mapping[]>([]);
   const [dropdownOptions, setDropdownOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sampleData, setSampleData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDataCategories = async () => {
@@ -53,15 +59,6 @@ const MappingPage: React.FC = () => {
       } catch (error: any) {
         console.error('Error fetching files:', error);
         setFiles([]);
-        if (error.response) {
-          console.error('Response data:', error.response.data);
-          console.error('Status:', error.response.status);
-          console.error('Headers:', error.response.headers);
-        } else if (error.request) {
-          console.error('No response received:', error.request);
-        } else {
-          console.error('Error setting up request:', error.message);
-        }
       } finally {
         setLoading(false);
       }
@@ -74,10 +71,27 @@ const MappingPage: React.FC = () => {
     setLoading(true);
     try {
       const safeCategory = dataCategory.replace(/\s+/g, '_');
+      console.log('Fetching mappings for:', { fileId, dataCategory: safeCategory });
       const response = await axios.get(`/api/mappings/${safeCategory}?fileId=${fileId}`);
-      console.log('Mapping API response:', response.data);
+      console.log('Full API response:', JSON.stringify(response.data, null, 2));
+      
       setMappings(response.data.mappings || []);
       setDropdownOptions(response.data.dropdownOptions || []);
+      
+      // Log and process sample data
+      console.log('Raw sample data:', response.data.sampleData);
+      if (response.data.sampleData && response.data.sampleData.length > 0) {
+        // Add unique IDs to each row for the DataGrid
+        const processedData: SampleDataRow[] = response.data.sampleData.map((row: any, index: number) => ({
+          id: index,
+          ...row
+        }));
+        console.log('Processed sample data:', processedData);
+        setSampleData(processedData);
+      } else {
+        console.log('No sample data available');
+        setSampleData([]);
+      }
     } catch (error) {
       console.error('Error fetching mappings:', error);
     } finally {
@@ -93,6 +107,7 @@ const MappingPage: React.FC = () => {
       fetchMappings(fileId, selectedDataCategory);
     } else {
       setMappings([]);
+      setSampleData([]);
     }
   };
 
@@ -102,6 +117,7 @@ const MappingPage: React.FC = () => {
     setSelectedDataCategory(category);
     setSelectedFileId('');
     setMappings([]);
+    setSampleData([]);
   };
 
   const handleOutputFieldChange = (index: number, newValue: string) => {
@@ -161,52 +177,83 @@ const MappingPage: React.FC = () => {
             <div className="text-center py-4">
               <p>Loading mappings...</p>
             </div>
-          ) : mappings.length === 0 ? (
-            <div className="text-center py-4">
-              <p>No mappings found for this file.</p>
-            </div>
           ) : (
-            <table className="min-w-full border">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2 border">Input Field</th>
-                  <th className="p-2 border">Mapped To</th>
-                  <th className="p-2 border">Confidence</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mappings.map((mapping, idx) => (
-                  <tr key={idx} className="border-b">
-                    <td className="p-2 border">{mapping.input_field}</td>
-                    <td className="p-2 border">
-                      <select
-                        className="border p-1 w-full"
-                        value={mapping.output_field}
-                        onChange={(e) =>
-                          handleOutputFieldChange(idx, e.target.value)
-                        }
-                      >
-                        <option value="">Select...</option>
-                        {dropdownOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
+            <>
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Field Mappings</h2>
+                <table className="min-w-full border">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="p-2 border">Input Field</th>
+                      <th className="p-2 border">Mapped To</th>
+                      <th className="p-2 border">Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {mappings.map((mapping, idx) => (
+                      <tr key={idx} className="border-b">
+                        <td className="p-2 border">{mapping.input_field}</td>
+                        <td className="p-2 border">
+                          <select
+                            className="border p-1 w-full"
+                            value={mapping.output_field}
+                            onChange={(e) =>
+                              handleOutputFieldChange(idx, e.target.value)
+                            }
+                          >
+                            <option value="">Select...</option>
+                            {dropdownOptions.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="p-2 border">
+                          <div className="w-full bg-gray-200 rounded h-4">
+                            <div
+                              className="bg-green-500 h-4 rounded"
+                              style={{ width: `${Math.round(mapping.confidence * 100)}%` }}
+                            ></div>
+                          </div>
+                          <span className="text-xs">{(mapping.confidence * 100).toFixed(1)}%</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {sampleData.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold mb-4">Data Preview</h2>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full border">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          {Object.keys(sampleData[0]).map((header) => (
+                            <th key={header} className="p-2 border font-semibold">
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sampleData.map((row, rowIndex) => (
+                          <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            {Object.values(row).map((value, colIndex) => (
+                              <td key={colIndex} className="p-2 border">
+                                {value}
+                              </td>
+                            ))}
+                          </tr>
                         ))}
-                      </select>
-                    </td>
-                    <td className="p-2 border">
-                      <div className="w-full bg-gray-200 rounded h-4">
-                        <div
-                          className="bg-green-500 h-4 rounded"
-                          style={{ width: `${Math.round(mapping.confidence * 100)}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs">{(mapping.confidence * 100).toFixed(1)}%</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

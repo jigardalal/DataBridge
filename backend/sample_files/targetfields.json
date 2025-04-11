@@ -166,7 +166,7 @@
     ]
   },
   {
-    "dataCategory": "trucks",
+    "dataCategory": "Trucks",
     "fields": [
       {
         "name": "Equipment Id",
@@ -290,7 +290,7 @@
     ]
   },
   {
-    "dataCategory": "customers",
+    "dataCategory": "Customers",
     "fields": [
       {
         "name": "Company Name",
@@ -435,7 +435,7 @@
     ]
   },
   {
-    "dataCategory": "Order_List",
+    "dataCategory": "Order List",
     "fields": [
       {
         "name": "Order Id",
@@ -1057,7 +1057,7 @@
     ]
   },
   {
-    "dataCategory": "Vehicle_List",
+    "dataCategory": "Vehicle List",
     "fields": [
       {
         "name": "Vehicle Id",
@@ -1172,7 +1172,7 @@
     ]
   },
   {
-    "dataCategory": "customerEmployee",
+    "dataCategory": "Customer Employee",
     "fields": [
       {
         "name": "Email",
@@ -1310,7 +1310,7 @@
     ]
   },
   {
-    "dataCategory": "Driver_List",
+    "dataCategory": "Driver List",
     "fields": [
       {
         "name": "Driver Id",
@@ -1364,7 +1364,7 @@
     ]
   },
   {
-    "dataCategory": "drivers",
+    "dataCategory": "Drivers",
     "fields": [
       {
         "name": "First Name",
@@ -1647,7 +1647,7 @@
     ]
   },
   {
-    "dataCategory": "Product_List",
+    "dataCategory": "Product List",
     "fields": [
       {
         "name": "Product Id",
@@ -1998,7 +1998,7 @@
     ]
   },
   {
-    "dataCategory": "Customer_List",
+    "dataCategory": "Customer List",
     "fields": [
       {
         "name": "Customer Id",
@@ -2218,7 +2218,7 @@
     ]
   },
   {
-    "dataCategory": "chassisOwner",
+    "dataCategory": "Chassis Owner",
     "fields": [
       {
         "name": "Company Name",

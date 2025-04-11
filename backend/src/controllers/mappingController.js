@@ -1,6 +1,10 @@
 const MappingDictionary = require('../models/MappingDictionary');
 const TargetField = require('../models/TargetField');
 const MappingAgent = require('../agents/MappingAgent');
+const FileData = require('../models/FileData');
+
+// Initialize the mapping agent
+const mappingAgent = new MappingAgent();
 
 module.exports = {
   // GET /api/mappings/:dataCategory
@@ -8,23 +12,48 @@ module.exports = {
     const { dataCategory } = req.params;
     const { fileId } = req.query;
     try {
+      console.log('Getting mappings for:', { dataCategory, fileId });
+      
       // Normalize dataCategory by replacing underscores with spaces
       const normalizedCategory = dataCategory.replace(/_/g, ' ');
 
       let inputFields = [];
+      let sampleData = [];
 
       if (fileId) {
-        const FileData = require('../models/FileData');
+        console.log('Fetching file data for fileId:', fileId);
         const fileData = await FileData.findById(fileId);
-        if (fileData && Array.isArray(fileData.columnHeaders)) {
-          inputFields = fileData.columnHeaders;
+        console.log('Found file data:', fileData ? 'yes' : 'no');
+        
+        if (fileData) {
+          if (Array.isArray(fileData.columnHeaders)) {
+            inputFields = fileData.columnHeaders;
+            console.log('Column headers:', inputFields);
+          }
+          // Get first 10 rows of data and ensure it's properly formatted
+          if (Array.isArray(fileData.data)) {
+            console.log('Total rows in file:', fileData.data.length);
+            sampleData = fileData.data.slice(0, 10).map(row => {
+              // Ensure each row has all columns, even if some are empty
+              const formattedRow = {};
+              inputFields.forEach(header => {
+                formattedRow[header] = row[header] !== undefined ? row[header] : '';
+              });
+              return formattedRow;
+            });
+            console.log('Sample data rows:', sampleData.length);
+            console.log('First sample row:', sampleData[0]);
+          }
         } else {
-          console.warn('FileData not found or missing headers for fileId:', fileId);
+          console.warn('FileData not found for fileId:', fileId);
         }
       }
 
       // Get target fields from TargetField collection
+      console.log('Fetching target fields for category:', normalizedCategory);
       const targetFieldsDoc = await TargetField.findOne({ dataCategory: normalizedCategory });
+      console.log('Found target fields:', targetFieldsDoc ? 'yes' : 'no');
+      
       const targetFields = targetFieldsDoc ? targetFieldsDoc.fields.map(f => ({
         name: f.name,
         type: f.type,
@@ -32,11 +61,33 @@ module.exports = {
         description: f.description
       })) : [];
 
-      res.json({
+      if (!inputFields.length || !targetFields.length) {
+        console.log('No input fields or target fields found');
+        return res.json({
+          inputFields,
+          targetFields,
+          mappings: [],
+          dropdownOptions: targetFields.map(f => f.name),
+          sampleData: []
+        });
+      }
+
+      // Generate mappings using the MappingAgent
+      console.log('Generating mappings...');
+      const mappingResult = await mappingAgent.mapFields(inputFields, targetFields);
+      
+      const response = {
         inputFields,
         targetFields,
-        mappings: [] // Start with empty mappings, user will create them
-      });
+        mappings: mappingResult.mappings,
+        dropdownOptions: targetFields.map(f => f.name),
+        unmappedFields: mappingResult.unmapped_fields,
+        overallConfidence: mappingResult.overall_confidence,
+        sampleData
+      };
+      
+      console.log('Sending response with sample data rows:', response.sampleData.length);
+      res.json(response);
     } catch (error) {
       console.error('Error getting mappings:', error);
       res.status(500).json({ 

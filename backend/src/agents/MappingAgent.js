@@ -279,169 +279,83 @@ class MappingAgent extends BaseAgent {
   }
 
   /**
-   * Map input fields to target schema fields
-   * @param {string[]} inputFields - Array of input field names
-   * @param {string} targetSchema - Target schema type (e.g., 'customer', 'driver')
-   * @param {Object} [options] - Additional options for mapping
-   * @returns {Promise<MappingResult>} Mapping result with confidence scores
+   * Map input fields to target fields using AI
+   * @param {string[]} inputFields - Array of input field names from uploaded file
+   * @param {Object[]} targetFields - Array of target field objects with name, type, etc.
+   * @returns {Promise<Object>} Mapping result with confidence scores
    */
-  async mapFields(inputFields, targetSchema, options = {}) {
+  async mapFields(inputFields, targetFields) {
     if (!inputFields || !inputFields.length) {
       throw new Error('No input fields provided');
     }
 
-    // Convert targetSchema to lowercase and replace spaces with underscores for consistency
-    const normalizedSchema = targetSchema.toLowerCase().replace(/\s+/g, '_');
-
-    // If we don't have a predefined dictionary for this schema, create a basic one
-    if (!this.mappingDictionary[normalizedSchema]) {
-      this.mappingDictionary[normalizedSchema] = {};
-      // Create basic field mappings based on common patterns
-      inputFields.forEach(field => {
-        const normalizedField = field.toLowerCase().replace(/\s+/g, '_');
-        this.mappingDictionary[normalizedSchema][normalizedField] = [field];
-      });
+    if (!targetFields || !targetFields.length) {
+      throw new Error('No target fields provided');
     }
 
-    // FAST MODE: skip LLM call, use dictionary heuristic
-    if (process.env.FAST_MAPPING === 'true') {
-      const mappings = [];
-      const unmapped_fields = [];
+    const systemMessage = {
+      role: 'system',
+      content: `You are an expert at matching field names between different data schemas. 
+Your task is to match input field names to the most appropriate target field names.
+For each input field, provide:
+1. The best matching target field
+2. A confidence score (0-1) indicating how confident you are in the match
+3. A brief explanation of why this match was chosen
 
-      inputFields.forEach(input => {
-        let matched = false;
-        const normalizedInput = input.toLowerCase().replace(/\s+/g, '_');
-        
-        // First try exact match
-        for (const [key, variations] of Object.entries(this.mappingDictionary[normalizedSchema])) {
-          if (variations.map(v => v.toLowerCase()).includes(input.toLowerCase())) {
-            mappings.push({
-              input_field: input,
-              output_field: key,
-              confidence: 0.9
-            });
-            matched = true;
-            break;
-          }
-        }
-
-        // If no exact match, try partial match
-        if (!matched) {
-          for (const [key, variations] of Object.entries(this.mappingDictionary[normalizedSchema])) {
-            const normalizedKey = key.toLowerCase();
-            const normalizedVariations = variations.map(v => v.toLowerCase());
-            
-            // Check if input contains any variation or vice versa
-            const hasMatch = normalizedVariations.some(v => 
-              normalizedInput.includes(v) || v.includes(normalizedInput)
-            );
-            
-            if (hasMatch) {
-              mappings.push({
-                input_field: input,
-                output_field: key,
-                confidence: 0.7 // Lower confidence for partial matches
-              });
-              matched = true;
-              break;
-            }
-          }
-        }
-
-        // If still no match, try to create a new mapping
-        if (!matched) {
-          const normalizedField = normalizedInput.replace(/[^a-z0-9_]/g, '');
-          if (normalizedField) {
-            mappings.push({
-              input_field: input,
-              output_field: normalizedField,
-              confidence: 0.5 // Lowest confidence for new fields
-            });
-          } else {
-            unmapped_fields.push(input);
-          }
-        }
-      });
-
-      return {
-        mappings,
-        unmapped_fields,
-        overall_confidence: mappings.length / inputFields.length,
-        usage_stats: {
-          timestamp: Date.now(),
-          model_used: 'fast-mode',
-          token_usage: 0
-        }
-      };
-    }
-
-    this.usageStats.total_calls++;
-    const cacheKey = this._generateMappingCacheKey(inputFields, normalizedSchema);
-    const cachedResult = this.getCachedResponse(cacheKey);
-    
-    if (cachedResult) {
-      this.usageStats.cache_hits++;
-      return cachedResult;
-    }
-
-    const systemMessage = this.formatSystemMessage('field mapping');
-    const userMessage = {
-      role: 'user',
-      content:
-        "Respond ONLY in JSON format with the following structure:\n" +
-        `{
-  "mappings": [
-    {
-      "input_field": "...",
-      "output_field": "...",
-      "confidence": 0.95
-    }
-  ],
-  "unmapped_fields": ["..."],
-  "overall_confidence": 0.9
-}\n` +
-        JSON.stringify({
-          input_fields: inputFields,
-          target_schema: normalizedSchema,
-          mapping_dictionary: this.mappingDictionary[normalizedSchema],
-          options
-        })
+Consider:
+- Semantic meaning of field names
+- Common abbreviations and variations
+- Field types and data patterns
+- Context from surrounding fields`
     };
 
-    const response = await this.makeAPICall(
-      [systemMessage, userMessage],
-      {
-        response_format: { type: 'json_object' },
-        temperature: 0.2
-      }
-    );
+    const userMessage = {
+      role: 'user',
+      content: `Match these input fields to the target fields:
+
+Input Fields:
+${JSON.stringify(inputFields, null, 2)}
+
+Target Fields:
+${JSON.stringify(targetFields, null, 2)}
+
+Provide your response in JSON format with:
+{
+  "mappings": [
+    {
+      "input_field": "original field name",
+      "output_field": "matched target field",
+      "confidence": 0.95,
+      "explanation": "why this match was chosen"
+    }
+  ],
+  "unmapped_fields": ["fields that couldn't be matched"],
+  "overall_confidence": 0.85
+}`
+    };
 
     try {
-      console.log('Raw OpenAI response content:', response.content);
+      const response = await this.makeAPICall([systemMessage, userMessage], {
+        temperature: 0.2,
+        response_format: { type: 'json_object' }
+      });
+
       const result = JSON.parse(response.content);
-      const mappingResult = {
+      
+      // Validate and format the response
+      return {
         mappings: result.mappings.map(m => ({
           input_field: m.input_field,
           output_field: m.output_field,
           confidence: m.confidence,
-          variations: m.variations || []
+          explanation: m.explanation
         })),
         unmapped_fields: result.unmapped_fields || [],
-        overall_confidence: result.overall_confidence,
-        usage_stats: {
-          timestamp: Date.now(),
-          model_used: response.model,
-          token_usage: response.usage
-        }
+        overall_confidence: result.overall_confidence || 0
       };
-
-      this._updateUsageStats(normalizedSchema, mappingResult.mappings);
-      this.cacheResponse(cacheKey, mappingResult);
-
-      return mappingResult;
     } catch (error) {
-      console.error('Failed to parse mapping response:', response.content);
-      throw new Error('Failed to parse mapping response');
+      console.error('Error in mapFields:', error);
+      throw new Error('Failed to generate field mappings');
     }
   }
 
