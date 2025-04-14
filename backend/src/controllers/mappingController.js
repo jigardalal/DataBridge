@@ -2,7 +2,7 @@ const MappingDictionary = require('../models/MappingDictionary');
 const TargetField = require('../models/TargetField');
 const MappingAgent = require('../agents/MappingAgent');
 const FileData = require('../models/FileData');
-const UserMapping = require('../models/UserMapping');
+const Dataset = require('../models/Dataset');
 
 // Initialize the mapping agent
 const mappingAgent = new MappingAgent();
@@ -102,6 +102,8 @@ module.exports = {
         required: f.required,
         description: f.description
       })) : [];
+      
+      console.log('Target fields detail:', JSON.stringify(targetFields, null, 2));
 
       if (!inputFields.length || !targetFields.length) {
         console.log('No input fields or target fields found');
@@ -407,48 +409,34 @@ Return ONLY the formula as plain text without any explanation, quotes or code bl
     try {
       const { name, description, dataCategory, fileId, mappings, targetFields } = req.body;
       
-      if (!name || !dataCategory || !fileId || !mappings) {
+      if (!fileId || !mappings) {
         return res.status(400).json({ error: 'Missing required fields' });
       }
       
-      // Check if a mapping with this name already exists for this data category
-      const existingMapping = await UserMapping.findOne({ 
-        name, 
-        dataCategory, 
-        fileId 
-      });
+      // Find the dataset by fileId
+      const dataset = await Dataset.findOne({ fileId });
       
-      if (existingMapping) {
-        // Update existing mapping
-        existingMapping.description = description;
-        existingMapping.mappings = mappings;
-        existingMapping.targetFields = targetFields;
-        existingMapping.lastUsed = new Date();
-        
-        await existingMapping.save();
-        return res.json({ 
-          success: true, 
-          message: 'Mapping updated successfully', 
-          mapping: existingMapping 
-        });
+      if (!dataset) {
+        return res.status(404).json({ error: 'Dataset not found for this file' });
       }
       
-      // Create new mapping
-      const newMapping = new UserMapping({
-        name,
-        description,
-        dataCategory,
-        fileId,
-        mappings,
-        targetFields
-      });
+      // Update the dataset with the mapping information
+      dataset.name = name || dataset.name;
+      dataset.description = description || dataset.description;
+      dataset.mappings = {
+        configurations: mappings,
+        targetFields: targetFields,
+        lastUpdated: new Date()
+      };
+      dataset.status = 'completed';
+      dataset.updatedAt = new Date();
       
-      await newMapping.save();
+      await dataset.save();
       
       res.json({ 
         success: true, 
         message: 'Mapping saved successfully', 
-        mapping: newMapping 
+        dataset
       });
     } catch (error) {
       console.error('Error saving user mappings:', error);
@@ -461,19 +449,26 @@ Return ONLY the formula as plain text without any explanation, quotes or code bl
     try {
       const { mappingId } = req.params;
       
-      const mapping = await UserMapping.findById(mappingId);
+      // Find the dataset by ID
+      const dataset = await Dataset.findById(mappingId);
       
-      if (!mapping) {
+      if (!dataset || !dataset.mappings) {
         return res.status(404).json({ error: 'Mapping not found' });
       }
       
       // Update last used timestamp
-      mapping.lastUsed = new Date();
-      await mapping.save();
+      dataset.updatedAt = new Date();
+      await dataset.save();
       
       res.json({ 
         success: true, 
-        mapping 
+        mapping: {
+          _id: dataset._id,
+          name: dataset.name,
+          description: dataset.description,
+          mappings: dataset.mappings.configurations,
+          targetFields: dataset.mappings.targetFields
+        }
       });
     } catch (error) {
       console.error('Error loading user mappings:', error);
@@ -486,21 +481,18 @@ Return ONLY the formula as plain text without any explanation, quotes or code bl
     try {
       const { dataCategory, fileId } = req.query;
       
-      let query = {};
-      
-      if (dataCategory) {
-        query.dataCategory = dataCategory;
-      }
+      let query = { 'mappings': { $exists: true, $ne: null } };
       
       if (fileId) {
         query.fileId = fileId;
       }
       
-      const mappings = await UserMapping.find(query)
-        .sort({ lastUsed: -1 })
-        .select('name description dataCategory fileId createdAt lastUsed');
+      // Find datasets that have mappings
+      const datasets = await Dataset.find(query)
+        .sort({ updatedAt: -1 })
+        .select('_id name description fileId createdAt updatedAt');
       
-      res.json(mappings);
+      res.json(datasets);
     } catch (error) {
       console.error('Error listing user mappings:', error);
       res.status(500).json({ error: error.message });
