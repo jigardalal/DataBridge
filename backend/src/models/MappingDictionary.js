@@ -5,6 +5,16 @@ const mappingEntrySchema = new mongoose.Schema({
   outputField: { type: String, required: true },
   confidenceScore: { type: Number, min: 0, max: 1 },
   isConfirmed: { type: Boolean, default: false },
+  transformationLogic: { 
+    type: String,
+    default: null,
+    description: 'Formula or transformation logic to apply to the input field'
+  },
+  transformationType: {
+    type: String,
+    enum: ['none', 'concatenate', 'substring', 'arithmetic', 'conditional', 'custom'],
+    default: 'none'
+  },
   _id: false
 });
 

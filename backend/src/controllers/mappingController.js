@@ -2,9 +2,50 @@ const MappingDictionary = require('../models/MappingDictionary');
 const TargetField = require('../models/TargetField');
 const MappingAgent = require('../agents/MappingAgent');
 const FileData = require('../models/FileData');
+const UserMapping = require('../models/UserMapping');
 
 // Initialize the mapping agent
 const mappingAgent = new MappingAgent();
+
+// Helper function to apply transformations
+const applyTransformation = (type, logic, row) => {
+  // Replace field references in the logic with actual values
+  const processedLogic = logic.replace(/{([^}]+)}/g, (match, fieldName) => {
+    const value = row[fieldName];
+    // Handle string values by adding quotes
+    if (typeof value === 'string') {
+      return `"${value.replace(/"/g, '\\"')}"`;
+    }
+    // Return the value as is for numbers, booleans, etc.
+    return value !== undefined ? value : 'undefined';
+  });
+  
+  // Execute different types of transformations
+  switch (type) {
+    case 'concatenate':
+      // For concatenation, we can directly evaluate the expression
+      return eval(processedLogic);
+      
+    case 'substring':
+      // For substring, we evaluate the expression which should return a string with substring method
+      return eval(processedLogic);
+      
+    case 'arithmetic':
+      // For arithmetic operations, we evaluate the expression
+      return eval(processedLogic);
+      
+    case 'conditional':
+      // For conditional logic, we evaluate the ternary expression
+      return eval(processedLogic);
+      
+    case 'custom':
+      // For custom transformations, we evaluate the custom logic
+      return eval(processedLogic);
+      
+    default:
+      throw new Error(`Unknown transformation type: ${type}`);
+  }
+};
 
 module.exports = {
   // GET /api/mappings/:dataCategory
@@ -111,7 +152,9 @@ module.exports = {
           mappings: mappings.map(m => ({
             inputField: m.input_field,
             outputField: m.output_field,
-            confidenceScore: m.confidence || 1.0
+            confidenceScore: m.confidence || 1.0,
+            transformationType: m.transformation_type || 'none',
+            transformationLogic: m.transformation_logic || null
           }))
         });
         await template.save();
@@ -171,5 +214,299 @@ module.exports = {
       console.error('Error fetching data categories:', error);
       res.status(500).json({ error: 'Error fetching data categories' });
     }
-  }
+  },
+
+  // POST /api/mappings/:dataCategory/preview
+  async previewMappedData(req, res) {
+    const { dataCategory } = req.params;
+    const { fileId, mappings } = req.body;
+    
+    try {
+      // Get file data
+      const fileData = await FileData.findById(fileId);
+      if (!fileData) {
+        return res.status(404).json({ error: 'File data not found' });
+      }
+      
+      // Get target fields
+      const normalizedCategory = dataCategory.replace(/_/g, ' ');
+      const targetFieldsDoc = await TargetField.findOne({ dataCategory: normalizedCategory });
+      if (!targetFieldsDoc) {
+        return res.status(404).json({ error: 'Target fields not found' });
+      }
+      
+      // Get all target field names to ensure they're included in output
+      const targetFieldNames = targetFieldsDoc.fields.map(field => field.name);
+      
+      // Apply mappings and transformations to the data
+      const mappedData = fileData.data.map(row => {
+        // Initialize result with all target fields set to null
+        const result = {};
+        targetFieldNames.forEach(fieldName => {
+          result[fieldName] = null;
+        });
+        
+        // Apply mappings and transformations
+        for (const mapping of mappings) {
+          if (!mapping.output_field) continue;
+          
+          // Get the input value
+          let value = row[mapping.input_field];
+          
+          // Apply transformation if specified
+          if (mapping.transformation_type && mapping.transformation_type !== 'none' && mapping.transformation_logic) {
+            try {
+              value = applyTransformation(mapping.transformation_type, mapping.transformation_logic, row);
+            } catch (error) {
+              console.error(`Error applying transformation for field ${mapping.output_field}:`, error);
+            }
+          }
+          
+          result[mapping.output_field] = value;
+        }
+        
+        return result;
+      });
+      
+      // Return all rows for preview
+      res.json({
+        data: mappedData,
+        totalRows: mappedData.length
+      });
+    } catch (error) {
+      console.error('Error generating preview:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+  
+  // POST /api/mappings/:dataCategory/export
+  async exportMappedData(req, res) {
+    const { dataCategory } = req.params;
+    const { fileId, mappings, format = 'csv' } = req.body;
+    
+    try {
+      // Get file data
+      const fileData = await FileData.findById(fileId);
+      if (!fileData) {
+        return res.status(404).json({ error: 'File data not found' });
+      }
+      
+      // Get target fields
+      const normalizedCategory = dataCategory.replace(/_/g, ' ');
+      const targetFieldsDoc = await TargetField.findOne({ dataCategory: normalizedCategory });
+      if (!targetFieldsDoc) {
+        return res.status(404).json({ error: 'Target fields not found' });
+      }
+      
+      // Get all target field names to ensure they're included in output
+      const targetFieldNames = targetFieldsDoc.fields.map(field => field.name);
+      
+      // Apply mappings and transformations to the data
+      const mappedData = fileData.data.map(row => {
+        // Initialize result with all target fields set to null
+        const result = {};
+        targetFieldNames.forEach(fieldName => {
+          result[fieldName] = null;
+        });
+        
+        // Apply mappings and transformations
+        for (const mapping of mappings) {
+          if (!mapping.output_field) continue;
+          
+          // Get the input value
+          let value = row[mapping.input_field];
+          
+          // Apply transformation if specified
+          if (mapping.transformation_type && mapping.transformation_type !== 'none' && mapping.transformation_logic) {
+            try {
+              value = applyTransformation(mapping.transformation_type, mapping.transformation_logic, row);
+            } catch (error) {
+              console.error(`Error applying transformation for field ${mapping.output_field}:`, error);
+            }
+          }
+          
+          result[mapping.output_field] = value;
+        }
+        
+        return result;
+      });
+      
+      // For now, just return the JSON data
+      // In a real implementation, you would convert to CSV or other formats as needed
+      res.json({
+        data: mappedData,
+        format,
+        fileName: `${normalizedCategory}_${new Date().toISOString().split('T')[0]}.${format}`
+      });
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Generate transformation formula using AI
+  async generateTransformationFormula(req, res) {
+    const { description, inputFields, outputField, sampleData } = req.body;
+    
+    if (!description) {
+      return res.status(400).json({ error: 'Description is required' });
+    }
+    
+    try {
+      // Use the mapping agent to generate the formula
+      const prompt = `
+Generate a JavaScript transformation formula based on this description:
+"${description}"
+
+Available input fields: ${JSON.stringify(inputFields)}
+Target output field: ${outputField}
+Sample data: ${JSON.stringify(sampleData)}
+
+The formula should use the syntax {fieldName} to reference input fields.
+For example, to concatenate firstName and lastName: {firstName} + " " + {lastName}
+
+Return ONLY the formula as plain text without any explanation, quotes or code blocks.
+      `;
+      
+      const response = await mappingAgent.makeAPICall([
+        { role: 'system', content: 'You are a helpful assistant that generates JavaScript transformation formulas.' },
+        { role: 'user', content: prompt }
+      ], { temperature: 0.2 });
+      
+      // Extract the formula from the response
+      let formula = response.content.trim();
+      
+      // Determine the transformation type based on the description and formula
+      let transformationType = 'custom';
+      if (description.toLowerCase().includes('concat') || formula.includes('+') && formula.includes('{')) {
+        transformationType = 'concatenate';
+      } else if (description.toLowerCase().includes('substring') || formula.includes('substring')) {
+        transformationType = 'substring';
+      } else if (description.toLowerCase().includes('multiply') || description.toLowerCase().includes('divide') || 
+                description.toLowerCase().includes('add') || description.toLowerCase().includes('subtract') ||
+                /[\+\-\*\/]/.test(formula)) {
+        transformationType = 'arithmetic';
+      } else if (description.toLowerCase().includes('if') || description.toLowerCase().includes('condition') || 
+                formula.includes('?')) {
+        transformationType = 'conditional';
+      }
+      
+      res.json({
+        formula,
+        transformationType,
+        success: true
+      });
+    } catch (error) {
+      console.error('Error generating transformation formula:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Save user mappings
+  async saveUserMappings(req, res) {
+    try {
+      const { name, description, dataCategory, fileId, mappings, targetFields } = req.body;
+      
+      if (!name || !dataCategory || !fileId || !mappings) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+      
+      // Check if a mapping with this name already exists for this data category
+      const existingMapping = await UserMapping.findOne({ 
+        name, 
+        dataCategory, 
+        fileId 
+      });
+      
+      if (existingMapping) {
+        // Update existing mapping
+        existingMapping.description = description;
+        existingMapping.mappings = mappings;
+        existingMapping.targetFields = targetFields;
+        existingMapping.lastUsed = new Date();
+        
+        await existingMapping.save();
+        return res.json({ 
+          success: true, 
+          message: 'Mapping updated successfully', 
+          mapping: existingMapping 
+        });
+      }
+      
+      // Create new mapping
+      const newMapping = new UserMapping({
+        name,
+        description,
+        dataCategory,
+        fileId,
+        mappings,
+        targetFields
+      });
+      
+      await newMapping.save();
+      
+      res.json({ 
+        success: true, 
+        message: 'Mapping saved successfully', 
+        mapping: newMapping 
+      });
+    } catch (error) {
+      console.error('Error saving user mappings:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+  
+  // Load user mappings
+  async loadUserMappings(req, res) {
+    try {
+      const { mappingId } = req.params;
+      
+      const mapping = await UserMapping.findById(mappingId);
+      
+      if (!mapping) {
+        return res.status(404).json({ error: 'Mapping not found' });
+      }
+      
+      // Update last used timestamp
+      mapping.lastUsed = new Date();
+      await mapping.save();
+      
+      res.json({ 
+        success: true, 
+        mapping 
+      });
+    } catch (error) {
+      console.error('Error loading user mappings:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+  
+  // List all user mappings
+  async listUserMappings(req, res) {
+    try {
+      const { dataCategory, fileId } = req.query;
+      
+      let query = {};
+      
+      if (dataCategory) {
+        query.dataCategory = dataCategory;
+      }
+      
+      if (fileId) {
+        query.fileId = fileId;
+      }
+      
+      const mappings = await UserMapping.find(query)
+        .sort({ lastUsed: -1 })
+        .select('name description dataCategory fileId createdAt lastUsed');
+      
+      res.json(mappings);
+    } catch (error) {
+      console.error('Error listing user mappings:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Export the applyTransformation function for testing
+  applyTransformation
 };
