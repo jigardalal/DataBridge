@@ -226,9 +226,11 @@ const MappingPage: React.FC = () => {
   
   // Always recalculate unmappedTargetFields when mappings or targetFields change
   useEffect(() => {
-    updateUnmappedTargetFields(mappings);
+    if (targetFields.length > 0) {
+      updateUnmappedTargetFields(mappings);
+    }
   }, [mappings, targetFields]);
-  
+
   const handleOutputFieldChange = (index: number, newValue: string) => {
     const updatedMappings = [...mappings];
     updatedMappings[index].output_field = newValue;
@@ -443,16 +445,25 @@ const MappingPage: React.FC = () => {
   // Load saved datasets when data category and file are selected
   useEffect(() => {
     if (selectedDataCategory && selectedFileId) {
+      console.log('[fetchSavedDatasets] Triggered for category:', selectedDataCategory, 'fileId:', selectedFileId);
       fetchSavedDatasets();
     }
   }, [selectedDataCategory, selectedFileId]);
-  
-  // Function to open save dataset modal
+
+  useEffect(() => {
+    console.log('[MappingPage] selectedStatus:', selectedStatus);
+  }, [selectedStatus]);
+
   const openSaveDatasetModal = () => {
     if (currentDataset) {
       setMappingName(currentDataset.name || '');
       setMappingDescription(currentDataset.description || '');
-      setSelectedStatus(currentDataset.status || '');
+      // Normalize status to allowed values
+      const allowedStatuses = ['pending', 'processing', 'completed', 'failed'];
+      const normalizedStatus = currentDataset.status?.toLowerCase().trim();
+      const finalStatus = allowedStatuses.includes(normalizedStatus) ? normalizedStatus : '';
+      console.log('[SaveDatasetModal] currentDataset.status:', currentDataset.status, '| normalized:', normalizedStatus, '| final:', finalStatus);
+      setSelectedStatus(finalStatus);
     } else {
       const defaultName = `${selectedDataCategory} Dataset - ${new Date().toLocaleDateString()}`;
       setMappingName(defaultName);
@@ -461,7 +472,7 @@ const MappingPage: React.FC = () => {
     }
     setShowSaveMappingModal(true);
   };
-  
+
   // Function to save the current mappings
   const saveCurrentMappings = async () => {
     if (!mappingName.trim()) {
@@ -538,12 +549,7 @@ const MappingPage: React.FC = () => {
         // If there are target fields in the dataset, use them
         if (Array.isArray(dataset.targetFields) && dataset.targetFields.length > 0) {
           setTargetFields(dataset.targetFields);
-          
-          // Wait for state updates to complete
-          setTimeout(() => {
-            // Update unmapped target fields
-            updateUnmappedTargetFields(mappingsArray);
-          }, 100);
+          updateUnmappedTargetFields(mappingsArray);
         } 
         // If no target fields in dataset, fetch them based on data category
         else if (dataset.dataCategory) {
@@ -553,7 +559,10 @@ const MappingPage: React.FC = () => {
         // Set the dataset name and description for saving
         setMappingName(dataset.name || '');
         setMappingDescription(dataset.description || '');
-        setSelectedStatus(dataset.status || '');
+        // Normalize status to allowed values
+        const allowedStatuses = ['pending', 'processing', 'completed', 'failed'];
+        const normalizedStatus = dataset.status?.toLowerCase();
+        setSelectedStatus(allowedStatuses.includes(normalizedStatus) ? normalizedStatus : '');
         
         // Get sample data from the file if fileId exists
         if (dataset.fileId) {
@@ -641,11 +650,8 @@ const MappingPage: React.FC = () => {
         setTargetFields(response.data.targetFields);
       }
       
-      // Wait for state updates to complete
-      setTimeout(() => {
-        // Update unmapped target fields
-        updateUnmappedTargetFields(loadedMappings);
-      }, 100);
+      // Update unmapped target fields
+      updateUnmappedTargetFields(loadedMappings);
       
       // Log and process sample data
       if (response.data.sampleData && response.data.sampleData.length > 0) {
@@ -1051,6 +1057,13 @@ const MappingPage: React.FC = () => {
                       onChange={(e) => setTransformationLogic(e.target.value)}
                       placeholder="Enter your transformation logic or formula here..."
                     />
+                  </div>
+                )}
+                
+                {transformationType === 'ai' && aiDescription && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                    <span className="block text-xs text-blue-700 font-semibold mb-1">AI Prompt Used:</span>
+                    <span className="text-sm text-blue-900">{aiDescription}</span>
                   </div>
                 )}
                 

@@ -23,7 +23,15 @@ module.exports = {
       
       console.log(`Found ${datasets.length} datasets`);
       
-      res.json(datasets);
+      // Always include a status field in the response
+      const datasetsWithStatus = datasets.map(ds => {
+        const obj = ds.toObject();
+        return {
+          ...obj,
+          status: obj.status || 'pending'
+        };
+      });
+      res.json(datasetsWithStatus);
     } catch (error) {
       console.error('Error listing datasets:', error);
       res.status(500).json({ error: error.message });
@@ -202,7 +210,8 @@ module.exports = {
           targetFields: targetFieldsArray,
           dataCategory: dataset.dataCategory || '',
           fileName: dataset.fileName || '',
-          fileId: dataset.fileId || dataset.fileUrl || ''
+          fileId: dataset.fileId || dataset.fileUrl || '',
+          status: dataset.status || 'pending'
         }
       });
     } catch (error) {
