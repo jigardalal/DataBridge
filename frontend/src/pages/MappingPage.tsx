@@ -449,11 +449,16 @@ const MappingPage: React.FC = () => {
   
   // Function to open save dataset modal
   const openSaveDatasetModal = () => {
-    // Generate a default name based on the data category and date
-    const defaultName = `${selectedDataCategory} Dataset - ${new Date().toLocaleDateString()}`;
-    setMappingName(defaultName);
-    setMappingDescription('');
-    setSelectedStatus(''); // Reset status selection
+    if (currentDataset) {
+      setMappingName(currentDataset.name || '');
+      setMappingDescription(currentDataset.description || '');
+      setSelectedStatus(currentDataset.status || '');
+    } else {
+      const defaultName = `${selectedDataCategory} Dataset - ${new Date().toLocaleDateString()}`;
+      setMappingName(defaultName);
+      setMappingDescription('');
+      setSelectedStatus('');
+    }
     setShowSaveMappingModal(true);
   };
   
@@ -467,20 +472,36 @@ const MappingPage: React.FC = () => {
     try {
       const selectedFile = files.find(file => file._id === selectedFileId);
       const fileName = selectedFile ? selectedFile.fileName : '';
-      
-      const response = await axios.post('/api/datasets/save', {
-        name: mappingName,
-        description: mappingDescription,
-        dataCategory: selectedDataCategory,
-        fileId: selectedFileId,
-        fileName: fileName,
-        mappings: mappings,
-        targetFields: targetFields,
-        status: selectedStatus
-      });
-      
-      setShowSaveMappingModal(false);
-      alert('Dataset saved successfully!');
+
+      if (currentDataset && currentDataset._id) {
+        // Update existing dataset
+        await axios.put(`/api/datasets/${currentDataset._id}`, {
+          name: mappingName,
+          description: mappingDescription,
+          dataCategory: selectedDataCategory,
+          fileId: selectedFileId,
+          fileName: fileName,
+          mappings: mappings,
+          targetFields: targetFields,
+          status: selectedStatus
+        });
+        setShowSaveMappingModal(false);
+        alert('Dataset updated successfully!');
+      } else {
+        // Create new dataset
+        await axios.post('/api/datasets/save', {
+          name: mappingName,
+          description: mappingDescription,
+          dataCategory: selectedDataCategory,
+          fileId: selectedFileId,
+          fileName: fileName,
+          mappings: mappings,
+          targetFields: targetFields,
+          status: selectedStatus
+        });
+        setShowSaveMappingModal(false);
+        alert('Dataset saved successfully!');
+      }
       fetchSavedDatasets(); // Refresh the list of saved datasets
     } catch (error) {
       console.error('Error saving mappings:', error);
@@ -532,6 +553,7 @@ const MappingPage: React.FC = () => {
         // Set the dataset name and description for saving
         setMappingName(dataset.name || '');
         setMappingDescription(dataset.description || '');
+        setSelectedStatus(dataset.status || '');
         
         // Get sample data from the file if fileId exists
         if (dataset.fileId) {

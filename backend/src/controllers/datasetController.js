@@ -113,6 +113,18 @@ module.exports = {
     }
   },
   
+  async updateDataset(req, res) {
+    try {
+      const datasetId = req.params.id;
+      const update = req.body;
+      const updated = await Dataset.findByIdAndUpdate(datasetId, update, { new: true });
+      if (!updated) return res.status(404).json({ error: 'Dataset not found' });
+      res.json({ success: true, dataset: updated });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+  
   async loadDataset(req, res) {
     try {
       const { mappingId } = req.params;
