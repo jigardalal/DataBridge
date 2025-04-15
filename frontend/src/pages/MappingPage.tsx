@@ -107,7 +107,6 @@ const MappingPage: React.FC = () => {
     const fetchDataCategories = async () => {
       try {
         const response = await axios.get('/api/data-categories');
-        console.log('Data categories:', response.data);
         setDataCategories(response.data || []);
       } catch (error) {
         console.error('Error fetching data categories:', error);
@@ -127,7 +126,6 @@ const MappingPage: React.FC = () => {
       setLoading(true);
       try {
         const response = await axios.get(`/api/files?dataCategory=${encodeURIComponent(selectedDataCategory)}`);
-        console.log('Uploaded files list:', response.data);
         setFiles(response.data || []);
       } catch (error: any) {
         console.error('Error fetching files:', error);
@@ -144,25 +142,20 @@ const MappingPage: React.FC = () => {
     setLoading(true);
     try {
       const safeCategory = dataCategory.replace(/\s+/g, '_');
-      console.log('Fetching mappings for:', { fileId, dataCategory: safeCategory });
       const response = await axios.get(`/api/mappings/${safeCategory}?fileId=${fileId}`);
-      console.log('Full API response:', JSON.stringify(response.data, null, 2));
       
       setMappings(response.data.mappings || []);
       setTargetFields(response.data.targetFields || []);
       
       // Log and process sample data
-      console.log('Raw sample data:', response.data.sampleData);
       if (response.data.sampleData && response.data.sampleData.length > 0) {
         // Add unique IDs to each row for the DataGrid
         const processedData: SampleDataRow[] = response.data.sampleData.map((row: any, index: number) => ({
           id: index,
           ...row
         }));
-        console.log('Processed sample data:', processedData);
         setSampleData(processedData);
       } else {
-        console.log('No sample data available');
         setSampleData([]);
       }
       
@@ -178,7 +171,6 @@ const MappingPage: React.FC = () => {
 
   const handleDataCategorySelect = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const category = e.target.value;
-    console.log('Selected data category:', category);
     setSelectedDataCategory(category);
     setSelectedFileId('');
     setMappings([]);
@@ -194,11 +186,9 @@ const MappingPage: React.FC = () => {
 
   const fetchTargetFields = async (dataCategory: string) => {
     try {
-      console.log(`Fetching target fields for category: ${dataCategory}`);
       const response = await axios.get(`/api/mappings/${dataCategory}`);
       
       if (response.data && response.data.targetFields) {
-        console.log(`Received ${response.data.targetFields.length} target fields:`, response.data.targetFields);
         setTargetFields(response.data.targetFields);
         
         // If we have mappings, update unmapped fields
@@ -509,7 +499,6 @@ const MappingPage: React.FC = () => {
     setLoading(true);
     try {
       const response = await axios.get(`/api/datasets/load/${datasetId}`);
-      console.log('Loaded dataset:', response.data);
       
       if (response.data.success) {
         const dataset = response.data.dataset;
@@ -527,19 +516,16 @@ const MappingPage: React.FC = () => {
         
         // If there are target fields in the dataset, use them
         if (Array.isArray(dataset.targetFields) && dataset.targetFields.length > 0) {
-          console.log('Setting target fields from dataset:', dataset.targetFields);
           setTargetFields(dataset.targetFields);
           
           // Wait for state updates to complete
           setTimeout(() => {
             // Update unmapped target fields
-            console.log('Calling updateUnmappedTargetFields with:', mappingsArray);
             updateUnmappedTargetFields(mappingsArray);
           }, 100);
         } 
         // If no target fields in dataset, fetch them based on data category
         else if (dataset.dataCategory) {
-          console.log('Fetching target fields for category:', dataset.dataCategory);
           await fetchTargetFields(dataset.dataCategory);
         }
         
@@ -583,7 +569,6 @@ const MappingPage: React.FC = () => {
     }
     
     try {
-      console.log(`Fetching sample data for fileId: ${fileId}`);
       const response = await axios.get(`/api/files/${fileId}/sample`);
       
       if (response.data && response.data.sampleData && response.data.sampleData.length > 0) {
@@ -592,7 +577,6 @@ const MappingPage: React.FC = () => {
           id: index,
           ...row
         }));
-        console.log(`Received ${processedData.length} sample data rows`);
         setSampleData(processedData);
       } else {
         console.log('No sample data received from API');
@@ -624,11 +608,7 @@ const MappingPage: React.FC = () => {
     
     setLoading(true);
     try {
-      console.log(`Fetching mappings for file: ${fileId} and category: ${selectedDataCategory}`);
       const response = await axios.get(`/api/mappings/${selectedDataCategory}?fileId=${fileId}`);
-      
-      // Log the full response to debug
-      console.log('Mapping API response:', response.data);
       
       // Set mappings from the response
       const loadedMappings = response.data.mappings || [];
@@ -636,19 +616,16 @@ const MappingPage: React.FC = () => {
       
       // If target fields were not already loaded, set them now
       if (targetFields.length === 0 && response.data.targetFields) {
-        console.log('Setting target fields from mapping response:', response.data.targetFields);
         setTargetFields(response.data.targetFields);
       }
       
       // Wait for state updates to complete
       setTimeout(() => {
         // Update unmapped target fields
-        console.log('Calling updateUnmappedTargetFields with:', loadedMappings);
         updateUnmappedTargetFields(loadedMappings);
       }, 100);
       
       // Log and process sample data
-      console.log('Raw sample data:', response.data.sampleData);
       if (response.data.sampleData && response.data.sampleData.length > 0) {
         // Add unique IDs to each row for the DataGrid
         const processedData: SampleDataRow[] = response.data.sampleData.map((row: any, index: number) => ({
@@ -836,11 +813,6 @@ const MappingPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {/* Debug log for mappings */}
-                    {(() => { console.log('🔍 DEBUG: Rendering mappings:', mappings); return null; })()}
-                    {(() => { console.log('🔍 DEBUG: Target fields:', targetFields); return null; })()}
-                    
-                    {/* First show all existing mappings */}
                     {mappings.map((mapping, index) => (
                       <tr 
                         key={`mapping-${index}`} 
@@ -867,10 +839,26 @@ const MappingPage: React.FC = () => {
                             ))}
                           </select>
                         </td>
-                        <td className="py-2 px-4 border-b">
-                          {typeof mapping.confidence === 'number'
-                            ? `${(mapping.confidence * 100).toFixed(0)}%`
-                            : 'N/A'}
+                        <td className="py-2 px-4 border-b text-center">
+                          <div className="flex items-center justify-center">
+                            <div
+                              className={`h-5 w-20 rounded-full flex items-center justify-center text-xs font-semibold 
+                                ${mapping.confidence >= 0.8 ? 'bg-green-100 text-green-800' : mapping.confidence >= 0.5 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}
+                            >
+                              <div className="w-full px-2">
+                                <div className="relative w-full h-2 rounded bg-gray-200">
+                                  <div
+                                    className={`absolute top-0 left-0 h-2 rounded 
+                                      ${mapping.confidence >= 0.8 ? 'bg-green-400' : mapping.confidence >= 0.5 ? 'bg-yellow-400' : 'bg-red-400'}`}
+                                    style={{ width: `${Math.round(mapping.confidence * 100)}%` }}
+                                  />
+                                </div>
+                                <span className="ml-1 align-middle">
+                                  {Math.round(mapping.confidence * 100)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </td>
                         <td className="py-2 px-4 border-b">
                           {mapping.transformation_type || 'None'}
